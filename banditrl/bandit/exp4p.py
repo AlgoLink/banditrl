@@ -9,7 +9,7 @@ import six
 from six.moves import zip
 import numpy as np
 
-from banditrl.base.bandit import BaseBandit
+from banditrl.bandit.base import BaseBandit
 
 LOGGER = logging.getLogger(__name__)
 

@@ -8,7 +8,7 @@ import logging
 import six
 import numpy as np
 
-from banditrl.base.bandit import BaseBandit
+from banditrl.bandit.base import BaseBandit
 
 
 LOGGER = logging.getLogger(__name__)

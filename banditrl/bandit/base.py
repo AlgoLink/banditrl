@@ -3,7 +3,7 @@ Bandit interfaces
 """
 from abc import abstractmethod
 
-from striatum import rewardplot as rplt
+from banditrl import rewardplot as rplt
 from ..storage import Recommendation
 
 

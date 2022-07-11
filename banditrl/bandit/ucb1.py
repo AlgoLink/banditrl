@@ -6,7 +6,7 @@ from __future__ import division
 import numpy as np
 import six
 
-from banditrl.base.bandit import BaseBandit
+from banditrl.bandit.base import BaseBandit
 
 
 class UCB1(BaseBandit):
