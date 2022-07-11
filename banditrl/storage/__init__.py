@@ -1,8 +1,8 @@
 """Storage classes
 """
 
-from .model import MemoryModelStorage
-from .history import MemoryHistoryStorage, History
+from .model import MemoryModelStorage,RliteModelStorage
+from .history import MemoryHistoryStorage, History,RliteHistoryStorage
 from .action import MemoryActionStorage, Action,RliteActionStorage
 from .recommendation import Recommendation
 
@@ -11,7 +11,9 @@ __all__=[
     'MemoryActionStorage',
     'Action',
     'MemoryModelStorage',
+    'RliteModelStorage',
     'MemoryHistoryStorage',
+    'RliteHistoryStorage',
     'History',
     'Recommendation'
 ]

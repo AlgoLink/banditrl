@@ -32,7 +32,10 @@ class MemoryModelStorage(ModelStorage):
         
 class RliteModelStorage(ModelStorage):
     """Store the model in memory."""
-    def __init__(self,model_id=None,banckend='pickle'):
+    def __init__(self,
+                 rlite_path=None,
+                 model_id=None,
+                 banckend='pickle'):
         if rlite_path is None:
             self.rlite_client= hirlite.Rlite("online_rlite.db",encoding='utf8')
         else:

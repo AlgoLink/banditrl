@@ -391,10 +391,12 @@ class RliteActionStorage(ActionStorage):
         model_dict_key = "_actions:dict:{}".format(model_id)
         _actions=self.rlite_client.command('get',model_dict_key)
         if _actions is None :
-            actions = {}
+            actions = []
         else:
-            actions = pickle.loads(_actions)
-        return six.viewkeys(actions)
+            actions_ori = pickle.loads(_actions)
+            actions = [a for a in actions_ori if isinstance (x[a],Action)]
+
+        return actions
 
     def __iter__(self,model_id=None):
         if model_id is None:

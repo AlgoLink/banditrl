@@ -38,43 +38,57 @@ class LinUCB(BaseBandit):
             International Conference on World Wide Web (WWW), 2010.
     """
 
-    def __init__(self, history_storage, model_storage, action_storage,
-                 recommendation_cls=None, context_dimension=128, alpha=0.5):
-        super(LinUCB, self).__init__(history_storage, model_storage,
-                                     action_storage, recommendation_cls)
+    def __init__(self, 
+                 history_storage,
+                 model_storage,
+                 action_storage,
+                 recommendation_cls=None,
+                 context_dimension=128, 
+                 model_id=None,
+                 alpha=0.5):
+        super(LinUCB, self).__init__(history_storage, 
+                                     model_storage,
+                                     action_storage,
+                                     recommendation_cls)
         self.alpha = alpha
         self.context_dimension = context_dimension
-
+        
+        model = self._model_storage.get_model(model_id)
         # Initialize LinUCB Model Parameters
-        model = {
-            # dictionary - For any action a in actions,
-            # A[a] = (DaT*Da + I) the ridge reg solution
-            'A': {},
-            # dictionary - The inverse of each A[a] for action a
-            # in actions
-            'A_inv': {},
-            # dictionary - The cumulative return of action a, given the
-            # context xt.
-            'b': {},
-            # dictionary - The coefficient vector of actiona with
-            # linear model b = dot(xt, theta)
-            'theta': {},
-        }
-        for action_id in self._action_storage.iterids():
-            self._init_action_model(model, action_id)
+        if model is None:
+            model = {
+                # dictionary - For any action a in actions,
+                # A[a] = (DaT*Da + I) the ridge reg solution
+                'A': {},
+                # dictionary - The inverse of each A[a] for action a
+                # in actions
+                'A_inv': {},
+                # dictionary - The cumulative return of action a, given the
+                # context xt.
+                'b': {},
+                # dictionary - The coefficient vector of actiona with
+                # linear model b = dot(xt, theta)
+                'theta': {},
+            }
 
-        self._model_storage.save_model(model)
+            for action_id in self._action_storage.iterids():
+                self._init_action_model(model, action_id)
 
-    def _init_action_model(self, model, action_id):
+    def _init_action_model(self, model, action_id,model_id=None):
+        if model_id is None:
+            model_id = self._model_id
         model['A'][action_id] = np.identity(self.context_dimension)
         model['A_inv'][action_id] = np.identity(self.context_dimension)
         model['b'][action_id] = np.zeros((self.context_dimension, 1))
         model['theta'][action_id] = np.zeros((self.context_dimension, 1))
+        self._model_storage.save_model(model,model_id)
 
-    def _linucb_score(self, context):
+    def _linucb_score(self, context,model_id=None):
         """disjoint LINUCB algorithm.
         """
-        model = self._model_storage.get_model()
+        if model_id is None:
+            model_id = self._model_id
+        model = self._model_storage.get_model(model_id)
         A_inv = model['A_inv']  # pylint: disable=invalid-name
         theta = model['theta']
 
@@ -94,7 +108,7 @@ class LinUCB(BaseBandit):
                                 + uncertainty[action_id])
         return estimated_reward, uncertainty, score
 
-    def get_action(self, context, n_actions=None):
+    def get_action(self, context, n_actions=None,model_id=None):
         """Return the action to perform
         Parameters
         ----------
@@ -111,6 +125,8 @@ class LinUCB(BaseBandit):
             Each dict contains
             {Action object, estimated_reward, uncertainty}.
         """
+        if model_id is None:
+            model_id = self._model_id
         if self._action_storage.count() == 0:
             return self._get_action_with_empty_action_storage(context,
                                                               n_actions)
@@ -120,7 +136,7 @@ class LinUCB(BaseBandit):
         if n_actions == -1:
             n_actions = self._action_storage.count()
 
-        estimated_reward, uncertainty, score = self._linucb_score(context)
+        estimated_reward, uncertainty, score = self._linucb_score(context,model_id)
 
         if n_actions is None:
             recommendation_id = max(score, key=score.get)
@@ -142,10 +158,13 @@ class LinUCB(BaseBandit):
                     score=score[action_id],
                 ))
 
-        history_id = self._history_storage.add_history(context, recommendations)
+        history_id = self._history_storage.add_history(context, 
+                                                       recommendations,
+                                                       request_id=request_id, 
+                                                       model_id=model_id)
         return history_id, recommendations
 
-    def reward(self, history_id, rewards):
+    def reward(self, history_id, rewards,model_id=None):
         """Reward the previous action with reward.
         Parameters
         ----------
@@ -154,12 +173,14 @@ class LinUCB(BaseBandit):
         rewards : dictionary
             The dictionary {action_id, reward}, where reward is a float.
         """
+        if model_id is None:
+            model_id = self._model_id
         context = (self._history_storage
-                   .get_unrewarded_history(history_id)
+                   .get_unrewarded_history(history_id,model_id=model_id)
                    .context)
 
         # Update the model
-        model = self._model_storage.get_model()
+        model = self._model_storage.get_model(model_id)
         A = model['A']  # pylint: disable=invalid-name
         A_inv = model['A_inv']  # pylint: disable=invalid-name
         b = model['b']
@@ -176,37 +197,41 @@ class LinUCB(BaseBandit):
             'A_inv': A_inv,
             'b': b,
             'theta': theta,
-        })
+        },model_id)
 
         # Update the history
-        self._history_storage.add_reward(history_id, rewards)
+        self._history_storage.add_reward(history_id, rewards,model_id)
 
-    def add_action(self, actions):
+    def add_action(self, actions,model_id=None):
         """ Add new actions (if needed).
         Parameters
         ----------
         actions : iterable
             A list of Action objects for recommendation
         """
-        new_action_ids = self._action_storage.add(actions)
-        model = self._model_storage.get_model()
+        if model_id is None:
+            model_id = self._model_id
+        new_action_ids = self._action_storage.add(actions,model_id)
+        model = self._model_storage.get_model(model_id)
 
         for action_id in new_action_ids:
-            self._init_action_model(model, action_id)
+            self._init_action_model(model, action_id, model_id)
 
         self._model_storage.save_model(model)
 
-    def remove_action(self, action_id):
+    def remove_action(self, action_id,model_id=None):
         """Remove action by id.
         Parameters
         ----------
         action_id : int
             The id of the action to remove.
         """
-        model = self._model_storage.get_model()
+        if model_id is None:
+            model_id = self._model_id
+        model = self._model_storage.get_model(model_id)
         del model['A'][action_id]
         del model['A_inv'][action_id]
         del model['b'][action_id]
         del model['theta'][action_id]
-        self._model_storage.save_model(model)
-        self._action_storage.remove(action_id)
+        self._model_storage.save_model(model,model_id)
+        self._action_storage.remove(action_id,model_id)
