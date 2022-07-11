@@ -51,11 +51,9 @@ class RliteEE:
 
     def _epsilon_greedy_selection(self,uid, model_id,topN):
         models = self.get_models(model_id)
-        epsilon_key = _key("{0}:epsilon".format(model_id))
-        random_key = _key("{0}:randomrecom".format(model_id))
-        
-        epsilon = self.rlite_client.command("get",epsilon_key)
-        random_recom = self.rlite_client.command("get",random_key)
+        epsilon = self.get_epsilon(model_id)
+        random_recom = self.get_random_signal(model_id)
+
         if random_recom is None:
             random_recom = 1.0
         else:
@@ -95,7 +93,7 @@ class RliteEE:
             _model_score = _reward/(model_tries + 0.00000001)
             score_key = _key("{0}:{1}:score".format(uid,model_id))
             model_score="-{}".format(_model_score)
-            self.rlite_client.command("zadd",model_score,str(item_id))
+            self.rlite_client.command("zadd",score_key, model_score,str(item_id))
 
         return True
 
@@ -139,7 +137,7 @@ class RliteEE:
 
         _model_score = _reward/float(model_tries)
         model_score="-{}".format(_model_score)
-        self.rlite_client.command("zadd",model_score,str(model))
+        self.rlite_client.command("zadd",score_key, model_score,str(model))
 
     def set_epsilon(self,
                     model_id:str=None,
@@ -147,10 +145,22 @@ class RliteEE:
         epsilon_key = _key("{0}:epsilon".format(model_id))
         self.rlite_client.command("set",epsilon_key,str(epsilon))
         return True
+    def get_epsilon(self,model_id):
+        epsilon_key = _key("{0}:epsilon".format(model_id))
+        return self.rlite_client.command("get",epsilon_key)
 
+    def set_random_signal(self,
+                    model_id:str=None,
+                    ifrandom:float=0.0):
+        random_key = _key("{0}:randomrecom".format(model_id))
+        self.rlite_client.command("set",random_key,str(ifrandom))
+        return True
+    def get_random_signal(self,model_id):
+        random_key = _key("{0}:randomrecom".format(model_id))
+        return self.rlite_client.command("get",random_key)
     def add_model(self,model_id:str=None,model:str=None):
         # model = item_id
-        key_models = "{0}:models".format(model_id) 
+        key_models = _key("{0}:models".format(model_id) )
         self.rlite_client.command("sadd",key_models,str(model))
 
         return True
