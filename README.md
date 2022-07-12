@@ -1,3 +1,8 @@
+<h1 align="center"><a href="https://github.com/AlgoLink/banditrl">banditrl</a></h1>
+<p align="center">
+    <em>A lightweight contextual bandit &amp; reinforcement learning library</em>
+</p>
+
 # banditrl
 A lightweight contextual bandit &amp; reinforcement learning library designed to be used in production Python services.
 
