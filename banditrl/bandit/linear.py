@@ -49,7 +49,7 @@ class LinEpsilonGreedy(BaseBandit):
                  n_actions=None,
                  random_state=2022,
                  dim = 3,
-                 epsilon = 0.2,
+                 epsilon = 1.0,
                  model_id=None):
         super(LinEpsilonGreedy, self).__init__(history_storage, 
                                             model_storage,
@@ -63,12 +63,22 @@ class LinEpsilonGreedy(BaseBandit):
         self._model_id=model_id
         self.random_ = check_random_state(random_state)
         self.n_actions = n_actions
+        self.dim = dim
+        
+        model = self._model_storage.get_model(model_id)
+        if model is None:
+            self._init_model()
+
+    
+    def _init_model(self,model_id=None):
+        if model_id is None:
+            model_id = self._model_id
         # model init
-        theta_hat = np.zeros((dim, n_actions))
+        theta_hat = np.zeros((self.dim, self.n_actions))
         A_inv = np.concatenate(
-            [np.identity(dim) for _ in np.arange(n_actions)]
-        ).reshape(n_actions, dim, dim)
-        b = np.zeros((dim, n_actions))
+            [np.identity(self.dim) for _ in np.arange(self.n_actions)]
+        ).reshape(self.n_actions, self.dim, self.dim)
+        b = np.zeros((self.dim, self.n_actions))
         model = {}
         model["A_inv"] = A_inv
         model["b"] = b
@@ -224,12 +234,21 @@ class LinUCB(BaseBandit):
         self._model_id=model_id
         self.random_ = check_random_state(random_state)
         self.n_actions = n_actions
+        self.dim = dim
+        
+        model = self._model_storage.get_model(model_id)
+        if model is None:
+            self._init_model()
+
+    def _init_model(self,model_id=None):
+        if model_id is None:
+            model_id = self._model_id
         # model init
-        theta_hat = np.zeros((dim, n_actions))
+        theta_hat = np.zeros((self.dim, self.n_actions))
         A_inv = np.concatenate(
-            [np.identity(dim) for _ in np.arange(n_actions)]
-        ).reshape(n_actions, dim, dim)
-        b = np.zeros((dim, n_actions))
+            [np.identity(self.dim) for _ in np.arange(self.n_actions)]
+        ).reshape(self.n_actions, self.dim, self.dim)
+        b = np.zeros((self.dim, self.n_actions))
         model = {}
         model["A_inv"] = A_inv
         model["b"] = b
@@ -377,12 +396,21 @@ class LinTS(BaseBandit):
         self._model_id=model_id
         self.random_ = check_random_state(random_state)
         self.n_actions = n_actions
+        self.dim = dim
+        
+        model = self._model_storage.get_model(model_id)
+        if model is None:
+            self._init_model()
+
+    def _init_model(self,model_id=None):
+        if model_id is None:
+            model_id = self._model_id
         # model init
-        theta_hat = np.zeros((dim, n_actions))
+        theta_hat = np.zeros((self.dim, self.n_actions))
         A_inv = np.concatenate(
-            [np.identity(dim) for _ in np.arange(n_actions)]
-        ).reshape(n_actions, dim, dim)
-        b = np.zeros((dim, n_actions))
+            [np.identity(self.dim) for _ in np.arange(self.n_actions)]
+        ).reshape(self.n_actions, self.dim, self.dim)
+        b = np.zeros((self.dim, self.n_actions))
         model = {}
         model["A_inv"] = A_inv
         model["b"] = b
