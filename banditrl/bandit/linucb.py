@@ -52,6 +52,7 @@ class LinUCB(BaseBandit):
                                      recommendation_cls)
         self.alpha = alpha
         self.context_dimension = context_dimension
+        self._model_id = model_id
         
         model = self._model_storage.get_model(model_id)
         # Initialize LinUCB Model Parameters
@@ -108,7 +109,7 @@ class LinUCB(BaseBandit):
                                 + uncertainty[action_id])
         return estimated_reward, uncertainty, score
 
-    def get_action(self, context, n_actions=None,model_id=None):
+    def get_action(self, context, n_actions=None,request_id=None,model_id=None):
         """Return the action to perform
         Parameters
         ----------
