@@ -2,6 +2,20 @@
 <p align="center">
     <em>A lightweight contextual bandit &amp; reinforcement learning library</em>
 </p>
+<p align="center">
+    <a href="https://img.shields.io/github/checks-status/AlgoLink/banditrl/main" target="_blank">
+        <img src="https://img.shields.io/github/checks-status/AlgoLink/banditrl/main" alt="Test">
+    </a>
+    <a href="https://img.shields.io/github/downloads/AlgoLink/banditrl/total" target="_blank">
+        <img src="https://img.shields.io/github/downloads/AlgoLink/banditrl/total" alt="Downloads">
+    </a>
+    <a href="https://img.shields.io/github/commit-activity/w/AlgoLink/banditrl" target="_blank">
+        <img src="https://img.shields.io/github/commit-activity/w/AlgoLink/banditrl" alt="Commit activity">
+    </a>
+    <a href="https://img.shields.io/github/stars/AlgoLink/banditrl?style=social" target="_blank">
+        <img src="https://img.shields.io/github/stars/AlgoLink/banditrl?style=social" alt="Stars">
+    </a>
+</p>
 
 # banditrl
 A lightweight contextual bandit &amp; reinforcement learning library designed to be used in production Python services.
