@@ -1,11 +1,9 @@
-"""
-Bandit interfaces
-"""
+"""Base Interfaces for Bandit Algorithms."""
 from abc import abstractmethod
+
 
 from banditrl import rewardplot as rplt
 from ..storage import Recommendation
-
 
 class BaseBandit(object):
     r"""Bandit algorithm
