@@ -279,7 +279,11 @@ class RliteHistoryStorage(HistoryStorage):
         if model_id is None:
             model_id = self._model_id
         created_at = datetime.now()
-
+        key_n_histories="banditrl:{}".format(model_id)
+        
+        self.n_histories = self.rlite_client.command("get",key_n_histories)
+        if self.n_histories is None:
+            self.n_histories = 0
         if rewards is None:
             history = History(request_id, context, recommendations, created_at)
             _history = pickle.dumps(history)
@@ -293,6 +297,7 @@ class RliteHistoryStorage(HistoryStorage):
             _history = pickle.dumps(history)
             histories_key = "banditrl:histories:{0}:{1}".format(model_id,request_id)
             self.rlite_client.command("set",histories_key,_history)
+        self.n_histories = self.rlite_client.command("incr",key_n_histories)
         return request_id
 
     def add_reward(self, history_id, rewards,model_id=None):
