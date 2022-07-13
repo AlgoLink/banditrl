@@ -20,7 +20,8 @@ def calculate_cum_reward(policy):
     """
     cum_reward = {-1: 0.0}
     cum_n_actions = {-1: 0}
-    for i in range(policy.history_storage.n_histories):
+    n_histories = policy.history_storage.n_histories
+    for i in range(int(n_histories)):
         reward = policy.history_storage.get_history(i).rewards
         cum_n_actions[i] = cum_n_actions[i - 1] + len(reward)
         cum_reward[i] = cum_reward[i - 1] + sum(six.viewvalues(reward))
@@ -41,7 +42,8 @@ def calculate_avg_reward(policy):
     """
     cum_reward, cum_n_actions = calculate_cum_reward(policy)
     avg_reward = {}
-    for i in range(policy.history_storage.n_histories):
+    n_histories = policy.history_storage.n_histories
+    for i in range(int(n_histories)):
         avg_reward[i] = cum_reward[i] / cum_n_actions[i]
     return avg_reward
 

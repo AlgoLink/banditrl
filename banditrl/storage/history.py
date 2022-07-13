@@ -131,12 +131,13 @@ class HistoryStorage(object):
 class MemoryHistoryStorage(HistoryStorage):
     """HistoryStorage that store History objects in memory."""
 
-    def __init__(self):
+    def __init__(self,model_id=None):
+        self._model_id=model_id
         self.histories = {}
         self.unrewarded_histories = {}
         self.n_histories = 0
 
-    def get_history(self, history_id):
+    def get_history(self, history_id,model_id=None):
         """Get the previous context, recommendations and rewards with
         history_id.
         Parameters
@@ -150,9 +151,11 @@ class MemoryHistoryStorage(HistoryStorage):
         -----
         KeyError
         """
+        if model_id is None:
+            model_id =self._model_id
         return self.histories[history_id]
 
-    def get_unrewarded_history(self, history_id):
+    def get_unrewarded_history(self, history_id,model_id=None):
         """Get the previous unrewarded context, recommendations and rewards with
         history_id.
         Parameters
@@ -166,9 +169,11 @@ class MemoryHistoryStorage(HistoryStorage):
         -----
         KeyError
         """
+        if model_id is None:
+            model_id =self._model_id
         return self.unrewarded_histories[history_id]
 
-    def add_history(self, context, recommendations, rewards=None):
+    def add_history(self, context, recommendations, rewards=None,model_id=None):
         """Add a history record.
         Parameters
         ----------
@@ -178,6 +183,8 @@ class MemoryHistoryStorage(HistoryStorage):
         Raise
         -----
         """
+        if model_id is None:
+            model_id =self._model_id
         created_at = datetime.now()
         history_id = self.n_histories
         if rewards is None:
@@ -191,7 +198,7 @@ class MemoryHistoryStorage(HistoryStorage):
         self.n_histories += 1
         return history_id
 
-    def add_reward(self, history_id, rewards):
+    def add_reward(self, history_id, rewards,model_id=None):
         """Add reward to a history record.
         Parameters
         ----------
@@ -201,6 +208,8 @@ class MemoryHistoryStorage(HistoryStorage):
         Raise
         -----
         """
+        if model_id is None:
+            model_id =self._model_id
         rewarded_at = datetime.now()
         history = self.unrewarded_histories.pop(history_id)
         history.update_reward(rewards, rewarded_at)

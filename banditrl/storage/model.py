@@ -21,13 +21,18 @@ class ModelStorage(object):
 
 class MemoryModelStorage(ModelStorage):
     """Store the model in memory."""
-    def __init__(self):
+    def __init__(self,model_id=None):
         self._model = None
+        self._model_id =model_id
 
-    def get_model(self):
+    def get_model(self,model_id=None):
+        if model_id is None:
+            model_id =self._model_id
         return self._model
 
-    def save_model(self, model):
+    def save_model(self, model,model_id=None):
+        if model_id is None:
+            model_id =self._model_id
         self._model = model
         
 class RliteModelStorage(ModelStorage):

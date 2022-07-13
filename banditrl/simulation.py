@@ -77,9 +77,9 @@ def evaluate_policy(policy, context, desired_actions):
     n_rounds = len(desired_actions)
     cum_regret = np.empty(shape=n_rounds)
     for t in range(n_rounds):
-        history_id, recommendation = policy.get_action(context[t])
+        history_id, recommendation = policy.get_action(context[t],None,t)
         action_id = recommendation.action.id
-        if desired_actions[t] != action_id:
+        if desired_actions[t] != int(action_id):
             policy.reward(history_id, {action_id: 0})
             if t == 0:
                 cum_regret[t] = 1.
