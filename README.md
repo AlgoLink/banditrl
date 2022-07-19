@@ -26,3 +26,6 @@ A lightweight contextual bandit &amp; reinforcement learning library designed to
 - 历史请求数据存储：如何存储请求，并在我们获得（延迟的）奖励时找到它
 - 行动存储：如何添加/删除行动并定义每个行动的一些特殊属性
 banditrl只提供了核心的上下文bandit算法，以及一些常见的存储操作（如内存存储/基于Rlite/redis的存储）。
+
+## 技术架构
+<img src="resources/art.png">
