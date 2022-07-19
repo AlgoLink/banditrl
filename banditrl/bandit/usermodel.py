@@ -8,6 +8,21 @@ import numpy as np
 import redis
 import pickle
 
+from dataclasses import dataclass
+from sklearn.utils import check_scalar
+from sklearn.utils import check_random_state
+
+import logging
+
+import six
+
+from banditrl.bandit.base import BaseBandit
+from .utils import check_array
+
+# configurations to replicate the Bernoulli Thompson Sampling policy used in ZOZOTOWN production
+#prior_bts_file = os.path.join(os.path.dirname(__file__), "conf", "prior_bts.yaml")
+#with open(prior_bts_file, "rb") as f:
+#    production_prior_for_bts = yaml.safe_load(f)
 
 DEFAULT_PREFIX = "banditrl:ee"
 
@@ -169,3 +184,177 @@ class RliteEE:
         key_models = _key("{0}:models".format(model_id))
         models = self.rlite_client.command("smembers",key_models)
         return models
+
+class BTS(BaseBandit):
+    """Bernoulli Thompson Sampling Policy
+    Parameters
+    ----------
+    n_actions: int
+        Number of actions.
+    len_list: int, default=1
+        Length of a list of actions in a recommendation/ranking inferface, slate size.
+        When Open Bandit Dataset is used, 3 should be set.
+    batch_size: int, default=1
+        Number of samples used in a batch parameter update.
+    random_state: int, default=None
+        Controls the random seed in sampling actions.
+    alpha: array-like, shape (n_actions, ), default=None
+        Prior parameter vector for Beta distributions.
+    beta: array-like, shape (n_actions, ), default=None
+        Prior parameter vector for Beta distributions.
+    is_zozotown_prior: bool, default=False
+        Whether to use hyperparameters for the beta distribution used
+        at the start of the data collection period in ZOZOTOWN.
+    campaign: str, default=None
+        One of the three possible campaigns considered in ZOZOTOWN, "all", "men", and "women".
+    policy_name: str, default='bts'
+        Name of bandit policy.
+    """
+    is_prior: bool = False
+    policy_name: str = "bts"
+    def __init__(self,
+                 history_storage,
+                 model_storage,
+                 action_storage,
+                 recommendation_cls=None,
+                 random_state=2022,
+                 action_list=[],
+                 alpha=1,
+                 beta = 1,
+                 model_id=None,
+                 campaign: Optional[str] = None):
+        super(BTS, self).__init__(history_storage, 
+                                  model_storage,
+                                  action_storage,
+                                  recommendation_cls)
+        self._model_id=model_id
+        self.random_ = check_random_state(random_state)
+        self.production_prior_for_bts = {}
+        self.campaign = campaign
+        self.action_list=action_list
+        if self.is_prior:
+            self.alpha = production_prior_for_bts[self.campaign]["alpha"]
+            self.beta = production_prior_for_bts[self.campaign]["beta"]
+        else:
+            self.alpha = alpha
+            self.beta = beta
+        self.policy_name = f"bandit_{self.policy_name}"
+        
+        model = self._model_storage.get_model(self._model_id)
+        if model is None:
+            self._init_model()
+
+    def _init_model(self,model_id=None):
+        if model_id is None:
+            model_id = self._model_id
+        # model init
+        
+        for action in self.action_list:
+            model = {}
+            model_key="action:{0}:model:{1}".format(action,model_id)
+            alpha_key="action:{0}:alpha".format(action)
+            beta_key="action:{0}:beta".format(action)
+            tries_key="action:{0}:tries".format(action)
+            reward_key = "action:{0}:rewards".format(action)
+            model[tries_key]=0
+            model[alpha_key] =1
+            model[beta_key] =1
+            model[reward_key] =0
+            self._model_storage.save_model(model,model_key)
+
+    def get_action(self,topN=1,model_id=None):
+        """Select a list of actions.
+        Returns
+        ----------
+        selected_actions: array-like, shape (len_list, )
+            List of selected actions.
+        """
+        if model_id is None:
+            model_id = self._model_id
+
+        score_key = "modelscore:bts:{0}".format(model_id)
+        predicted_rewards = self._model_storage.rlite_client.command("zrange",
+                                                                     score_key,
+                                                                     "0",
+                                                                     str(topN-1))
+        self.expose_actions(predicted_rewards,model_id=model_id)
+        return predicted_rewards
+
+    def reward(self, 
+               action: int, 
+               reward: float,
+               model_id:str =None,
+               offline= False) -> None:
+        """Update policy parameters.
+        Parameters
+        ----------
+        action: int
+            Selected action by the policy.
+        reward: float
+            Observed reward for the chosen action and position.
+        """
+        if model_id is None:
+            model_id = self._model_id
+        model_key="action:{0}:model:{1}".format(action,model_id)
+        model = self._model_storage.get_model(model_key)
+        tries_key="action:{0}:tries".format(action)
+        alpha_key="action:{0}:alpha".format(action)
+        beta_key="action:{0}:beta".format(action)
+        reward_key = "action:{0}:rewards".format(action)
+        model_tries = model[tries_key]
+        rewards = model[reward_key]
+        beta = model[beta_key]
+        alpha = model[alpha_key]
+        if offline:
+            model_tries+=1
+            
+        rewards+=reward
+        model[reward_key] = rewards
+        model[tries_key] = model_tries
+        
+        _b = (model_tries - rewards) + beta
+        if _b<=0:
+            _b = 1
+        _model_score = self.random_.beta(
+                a=rewards + alpha,
+                b= _b,
+            )
+        model_score="-{}".format(_model_score)
+        self._model_storage.rlite_client.command("zadd",score_key, model_score,str(action))
+        self._model_storage.save_model(model,model_key)
+
+
+    def expose_actions(self,actions_list,model_id=None):
+        if model_id is None:
+            model_id = self._model_id
+
+        score_key = "modelscore:bts:{0}".format(model_id)
+        for action in actions_list:
+            model_key="action:{0}:model:{1}".format(action,model_id)
+            tries_key="action:{0}:tries".format(action)
+            alpha_key="action:{0}:alpha".format(action)
+            beta_key="action:{0}:beta".format(action)
+            reward_key = "action:{0}:rewards".format(action)
+            
+            model = self._model_storage.get_model(model_key)
+            #更新曝光ID的 score
+            model_tries = model.get(tries_key)
+            alpha = model[alpha_key]
+            beta = model[beta_key]
+            rewards = model[reward_key]
+            if model_tries is None:
+                model_tries = 1
+            else:
+                model_tries = int(model_tries)+1
+            model[tries_key] = model_tries
+            _b = (model_tries - rewards) + beta
+            if _b<=0:
+                _b = 1
+            _model_score = self.random_.beta(
+                a=rewards + alpha,
+                b= _b,
+            )
+            model_score="-{}".format(_model_score)
+            self._model_storage.rlite_client.command("zadd",score_key, model_score,str(action))
+            
+            self._model_storage.save_model(model,model_key)
