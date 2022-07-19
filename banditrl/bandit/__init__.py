@@ -6,6 +6,19 @@ from .exp4p import Exp4P
 from .linthompsamp import LinThompSamp
 from .linucb import LinUCB
 from .ucb1 import UCB1
-from .usermodel import RliteEE
+from .usermodel import RliteEE,BTS
+from .linear import LinUCB as Linucb
+from .linear import LinTS
+from .linear import LinEpsilonGreedy as LinEE
 
-__all__ = ['Exp3', 'Exp4P', 'LinThompSamp', 'LinUCB', 'UCB1','RliteEE']
+__all__ = [
+    'Exp3', 
+    'Exp4P', 
+    'LinThompSamp', 
+    'LinUCB', 
+    'UCB1',
+    'RliteEE',
+    'BTS',
+    'Linucb',
+    'LinEE',
+    'LinTS']
