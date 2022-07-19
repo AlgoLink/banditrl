@@ -213,16 +213,17 @@ class BTS(BaseBandit):
     is_prior: bool = False
     policy_name: str = "bts"
     def __init__(self,
-                 history_storage,
-                 model_storage,
-                 action_storage,
+                 history_storage=None,
+                 model_storage=None,
+                 action_storage=None,
                  recommendation_cls=None,
                  random_state=2022,
                  action_list=[],
                  alpha=1,
                  beta = 1,
                  model_id=None,
-                 campaign: Optional[str] = None):
+                 campaign: Optional[str] = None,
+                 init_model=False):
         super(BTS, self).__init__(history_storage, 
                                   model_storage,
                                   action_storage,
@@ -240,8 +241,7 @@ class BTS(BaseBandit):
             self.beta = beta
         self.policy_name = f"bandit_{self.policy_name}"
         
-        model = self._model_storage.get_model(self._model_id)
-        if model is None:
+        if init_model:
             self._init_model()
 
     def _init_model(self,model_id=None):
@@ -281,7 +281,7 @@ class BTS(BaseBandit):
         return predicted_rewards
 
     def reward(self, 
-               action: int, 
+               action, 
                reward: float,
                model_id:str =None,
                offline= False) -> None:
@@ -296,6 +296,7 @@ class BTS(BaseBandit):
         if model_id is None:
             model_id = self._model_id
         model_key="action:{0}:model:{1}".format(action,model_id)
+        score_key = "modelscore:bts:{0}".format(model_id)
         model = self._model_storage.get_model(model_key)
         tries_key="action:{0}:tries".format(action)
         alpha_key="action:{0}:alpha".format(action)
