@@ -216,7 +216,7 @@ class MemoryHistoryStorage(HistoryStorage):
         self.histories[history.history_id] = history
 
 class RliteHistoryStorage(HistoryStorage):
-    """HistoryStorage that store History objects in redis."""
+    """HistoryStorage that store History objects in disk cache rlite."""
 
     def __init__(self,rlite_path=None,model_id=None):
         if rlite_path is None:

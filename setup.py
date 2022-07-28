@@ -40,6 +40,7 @@ setup(
     packages=[
         'banditrl',
         'banditrl.bandit',
+        'banditrl.preprocessing',
         'banditrl.storage',
         'banditrl.utils',
     ],
@@ -48,5 +49,6 @@ setup(
         'banditrl.bandit': 'banditrl/bandit',
         'banditrl.storage': 'banditrl/storage',
         'banditrl.utils': 'banditrl/utils',
+        'banditrl.preprocessing':'banditrl/preprocessing'
     },
 )
