@@ -54,14 +54,17 @@ class BanditContextEncoder:
 
         return vals
 
-    def preprocess_input(self, input, choices):
+    def preprocess_input(self, input, choices,ext=False):
         # score input choices or all choices by default if none provided.
         # expand the input across all of these choices
         self.scored_choices = choices = choices or self.choices
-        expanded_input = [
-            dict(input, **{preprocessor.DECISION_FEATURE_NAME: d})
-            for d in self.scored_choices
-        ]
+        if ext:
+            expanded_input = [
+                dict(input, **{preprocessor.DECISION_FEATURE_NAME: d})
+                for d in self.scored_choices
+            ]
+        else:
+            expanded_input = [input]
 
         df = pd.DataFrame(expanded_input)
         float_feature_array = np.empty((len(df), 0))
@@ -196,13 +199,13 @@ class BanditContextEncoder:
         X, _ = preprocessor.data_to_pytorch(data)
         return X
 
-    def predict(self, input, choices=None, get_ucb_scores=False):
+    def predict(self, input, choices=None, get_ucb_scores=False, ext=False):
         """
         If `get_ucb_scores` is True, get upper confidence bound scores which
         requires a model trained with dropout and for the model to be in train()
         mode (eval model turns off dropout by default).
         """
-        input = self.preprocess_input(input, choices)
+        input = self.preprocess_input(input, choices, ext)
         pytorch_input = self.preprocessed_input_to_pytorch(input)
 
         
