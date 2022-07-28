@@ -43,12 +43,14 @@ setup(
         'banditrl.preprocessing',
         'banditrl.storage',
         'banditrl.utils',
+        'banditrl.ext'
     ],
     package_dir={
         'banditrl': 'banditrl',
         'banditrl.bandit': 'banditrl/bandit',
         'banditrl.storage': 'banditrl/storage',
         'banditrl.utils': 'banditrl/utils',
-        'banditrl.preprocessing':'banditrl/preprocessing'
+        'banditrl.preprocessing':'banditrl/preprocessing',
+        'banditrl.ext': 'banditrl/ext'
     },
 )
