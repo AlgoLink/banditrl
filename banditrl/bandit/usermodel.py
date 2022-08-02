@@ -298,14 +298,16 @@ class BTS(BaseBandit):
         model_key="action:{0}:model:{1}".format(action,model_id)
         score_key = "modelscore:bts:{0}".format(model_id)
         model = self._model_storage.get_model(model_key)
+        if model is None:
+            model = {}
         tries_key="action:{0}:tries".format(action)
         alpha_key="action:{0}:alpha".format(action)
         beta_key="action:{0}:beta".format(action)
         reward_key = "action:{0}:rewards".format(action)
-        model_tries = model[tries_key]
-        rewards = model[reward_key]
-        beta = model[beta_key]
-        alpha = model[alpha_key]
+        model_tries = model.get(tries_key,1.0)
+        rewards = model.get(reward_key,0)
+        beta = model.get(beta_key,1.0)
+        alpha = model.get(alpha_key,1.0)
         if offline:
             model_tries+=1
             
@@ -320,6 +322,8 @@ class BTS(BaseBandit):
                 a=rewards + alpha,
                 b= _b,
             )
+        model[alpha_key] = rewards + alpha
+        model[beta_key] = _b
         model_score="-{}".format(_model_score)
         self._model_storage.rlite_client.command("zadd",score_key, model_score,str(action))
         self._model_storage.save_model(model,model_key)
@@ -355,6 +359,8 @@ class BTS(BaseBandit):
                 a=rewards + alpha,
                 b= _b,
             )
+            model[alpha_key] = rewards + alpha
+            model[beta_key] = _b
             model_score="-{}".format(_model_score)
             self._model_storage.rlite_client.command("zadd",score_key, model_score,str(action))
             

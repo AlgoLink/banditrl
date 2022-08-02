@@ -7,6 +7,9 @@ from sklearn import preprocessing
 from sklearn.impute import SimpleImputer
 from collections import defaultdict
 import pickle
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class BanditContextEncoder:
