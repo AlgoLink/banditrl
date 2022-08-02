@@ -46,7 +46,7 @@ Models supported:
   - [x] Linear Thompson Sampling bandit(LinTS)
   - [x] ε-greedy (LinEpsilonGreedy)
 - Contextual Free(User model)
-  - [x] Epsilon Greedy policy bandt(RliteEE)
+  - [x] Epsilon Greedy policy bandit(RliteEE)
   - [x] Bernoulli Thompson Sampling Policy bandit(BTS) [(via. Thompson Sampling
 )](https://towardsdatascience.com/thompson-sampling-fc28817eacb8)
 
