@@ -36,3 +36,37 @@ banditrl提供了核心的上下文bandit算法，以及一些常见的存储操
 
 ## 技术架构
 <img src="resources/art.png">
+
+## 当前支持的模型
+
+Models supported:
+
+- Contextual Bandits
+  - [x] Linear bandit(LinUCB)
+  - [x] Linear Thompson Sampling bandit(LinTS)
+  - [x] ε-greedy (LinEpsilonGreedy)
+- Contextual Free(User model)
+  - [x] Epsilon Greedy policy bandt(RliteEE)
+  - [x] Bernoulli Thompson Sampling Policy bandit(BTS) [(via. Thompson Sampling
+)](https://towardsdatascience.com/thompson-sampling-fc28817eacb8)
+
+## 当前支持的特征类型
+
+<b>4</b> feature types supported:
+* <b>Numeric:</b> standard floating point features
+  * e.g. `{totalCartValue: 39.99}`
+* <b>Categorical:</b> low-cardinality discrete features
+  * e.g. `{currentlyViewingCategory: "men's jeans"}`
+* <b>ID list:</b> high-cardinality discrete features
+  * e.g. `{productsInCart: ["productId022", "productId109"...]}`
+  * Handled via. learned embedding tables
+* <b>"Dense" ID list:</b> high-cardinality discrete features, manually mapped to dense feature vectors
+  * e.g `{productId022: [0.5, 1.3, ...], productId109: [1.9, 0.1, ...], ...}`
+
+## Docs
+
+```
+pip install .
+```
+
+[Get started](DOCS.md)
