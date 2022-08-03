@@ -18,3 +18,22 @@ Sample records:
 |  1  |  u123  |        1        | {"spin_cnt": 2, "rt": "2019-01-01"} |  DC1  |  99.2 |
 |  2  |  u456  |        1        | {"spin_cnt": 4, "rt": "2022-01-01"} |   DC4   |  399.9 |
 ```
+## 模型离线训练
+
+一旦获取了符合上述模式的数据集，我们就可以训练一个离线模型。按照下面的步骤来进行训练：
+
+Import `banditrl` library:
+```
+from banditrl.preprocessing.feature_encodings import BanditContextEncoder
+from banditrl.bandit import Linucb
+from banditrl.bandit import BTS
+
+from banditrl.storage import (
+    MemoryHistoryStorage,
+    RliteHistoryStorage,
+    MemoryModelStorage,
+    MemoryActionStorage,
+    RliteModelStorage,
+    Action
+)
+```
