@@ -81,7 +81,8 @@ def validate_ml_config(ml_config: Dict) -> NoReturn:
 
 
 def validate_training_data_schema(training_df: pd.DataFrame) -> NoReturn:
-    for col in ["context", "decision", "reward", "mdp_id", "sequence_number"]:
+    #TODO: add "mdp_id", "sequence_number"
+    for col in ["context", "decision", "reward"]:
         assert col in training_df.columns
 
 
