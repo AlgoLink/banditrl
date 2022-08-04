@@ -2,6 +2,7 @@ import json
 import logging
 import math
 from typing import Dict, NoReturn
+import string
 
 import pandas as pd
 
@@ -30,7 +31,36 @@ def get_logger(name: str):
     )
     return logging.getLogger(name)
 
-
+def str_count(str):
+    '''找出字符串中的中英文、空格、数字、标点符号个数'''
+    count_en = count_dg = count_sp = count_zh = count_pu = 0
+    str_len=0
+    for s in str:
+        # 英文
+        if s in string.ascii_letters:
+            count_en += 1
+        # 数字
+        elif s.isdigit():
+            count_dg += 1
+        # 空格
+        elif s.isspace():
+            count_sp += 1
+        # 中文
+        elif s.isalpha():
+            count_zh += 1
+        # 特殊字符
+        else:
+            count_pu += 1
+            
+    str_len  = count_en+count_dg+count_sp+count_pu+2*count_zh
+    
+    #print('英文字符：', count_en)
+    #print('数字：', count_dg)
+    #print('空格：', count_sp)
+    #print('中文：', count_zh)
+    #print('特殊字符：', count_pu)
+    #print('长度：', str_len)
+    return str_len
 def fancy_print(text: str, color="blue", size=60):
     ansi_color = "\033[94m"
     if color == "green":
@@ -41,7 +71,7 @@ def fancy_print(text: str, color="blue", size=60):
         raise Exception(f"Color {color} not supported")
 
     end_color = "\033[0m"
-    str_len = len(text)
+    str_len = len(text.encode())
     padding = math.ceil((size - str_len) / 2)
     header_len = padding * 2 + str_len + 2
     border = "#" * header_len
