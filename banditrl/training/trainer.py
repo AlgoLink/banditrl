@@ -35,6 +35,10 @@ def train(
     start = time.time()
 
     utils.validate_ml_config(ml_config)
+    _dbpath = ml_config["storage"]["model"].get("path",os.path.join(os.getcwd(),"model.db"))
+    _model_id = ml_config.get("model_id", None)
+    logger.info(f"接下来训练的模型为: {_model_id}")
+    logger.info(f"模型存储的路径: {_dbpath}")
     logger.info("检查训练数据的格式...")
     utils.validate_training_data_schema(training_df)
     if len(training_df) == 0:
