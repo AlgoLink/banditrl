@@ -16,20 +16,10 @@ from ..storage import (
 
 logger = utils.get_logger(__name__)
 
-
-
 class BanditPredictor:
     """Class used to make predictions given a trained bandit model including reward."""
-    def __init__(self,ml_config,predictor_save_dir: str = None):
+    def __init__(self,ml_config):
         self.ml_config = ml_config
-        if not self.ml_config["features"].get("context_free", False):
-            if predictor_save_dir is not None:
-                logger.info("loading predictor artifacts from disk...")
-                model_id = self.ml_config.get("model_id", "model")
-                
-                save_dir = f"{predictor_save_dir}/{model_id}/"
-                predictor_config_path = f"{save_dir}/{model_id}_features.pkl"
-                self.feature_transformer = BanditContextEncoder.encoder_from_file(predictor_config_path)
     @property
     def build_model(self):
         model_type = self.ml_config["model_type"]
@@ -91,3 +81,16 @@ class BanditPredictor:
                                                                model_id= model_id)
             
         return model
+
+    @property
+    def build_feature_transformer(self):
+        predictor_save_dir = self.ml_config["storage"].get("predictor_save_dir")
+        if predictor_save_dir is not None:
+            logger.info("loading predictor artifacts from disk...")
+            model_id = self.ml_config.get("model_id", "model")
+            save_dir = f"{predictor_save_dir}/{model_id}/"
+            predictor_config_path = f"{save_dir}/{model_id}_features.pkl"
+            feature_transformer = BanditContextEncoder.encoder_from_file(predictor_config_path)
+            return feature_transformer.predict
+        else:
+            return None

@@ -29,7 +29,6 @@ def train(
     training_df: pd.DataFrame,
     ml_config: Dict = None,
     feature_config: Dict = None,
-    predictor_save_dir: str = None,
     itemid_to_action:Dict= {},
     model_id: str = None,
     offline_train = True
@@ -223,6 +222,7 @@ def train(
             train_percent=ml_config["train_percent"],
         )
         
+    predictor_save_dir = ml_congig["storage"].get("predictor_save_dir")
     if predictor_save_dir is not None:
         logger.info("Saving predictor artifacts to disk...")
         model_id = ml_config.get("model_id", "model")
