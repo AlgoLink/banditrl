@@ -74,3 +74,5 @@ pip install .
 ### Contextual Free(User model)
 
 [Epsilon Greedy policy bandit(RliteEE)](docs/rliteee.md)
+
+[Bernoulli Thompson Sampling Policy bandit(BTS)](docs/bts.md)
