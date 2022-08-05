@@ -55,3 +55,8 @@ test=predictor.BanditPredictor(ml_config)
 model = test.build_model
 model.select_model(uid=3,model_id="model_rliteee_v1",topN=2)
 ```
+实时反馈
+
+```
+model.reward_model(model="male",uid=3,model_id="model_rliteee_v1",reward=156.0)
+````
