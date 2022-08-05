@@ -3,7 +3,7 @@ import numpy as np
 import torch
 from sklearn.metrics import accuracy_score, log_loss, mean_squared_error, roc_auc_score
 from sklearn.model_selection import train_test_split
-from skorch import NeuralNetClassifier, NeuralNetRegressor, dataset
+#from skorch import NeuralNetClassifier, NeuralNetRegressor, dataset
 
 from . import utils
 

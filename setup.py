@@ -44,7 +44,8 @@ setup(
         'banditrl.storage',
         'banditrl.utils',
         'banditrl.ext',
-        'banditrl.training'
+        'banditrl.training',
+        'banditrl.serving'
     ],
     package_dir={
         'banditrl': 'banditrl',
@@ -53,6 +54,7 @@ setup(
         'banditrl.utils': 'banditrl/utils',
         'banditrl.preprocessing':'banditrl/preprocessing',
         'banditrl.ext': 'banditrl/ext',
-        'banditrl.training': 'banditrl/training'
+        'banditrl.training': 'banditrl/training',
+        'banditrl.serving': 'banditrl/serving'
     },
 )
