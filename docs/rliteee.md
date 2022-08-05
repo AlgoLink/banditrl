@@ -31,3 +31,26 @@ test = train(
 ```
 训练日志
 ![train logs](../resources/rliteee_train.jpg)
+
+## 模型预测
+
+from banditrl.serving import predictor
+
+ml_config = {
+    "model_id": "model_rliteee_v1",
+    "storage":{
+        "model":{"type":"rlite",
+                 "path":"model.db"},
+        "his_context":{},
+        "action":{},
+        "predictor_save_dir":None
+    },
+    "features":{"context_free":True},
+    "model_type": "rliteee",
+    "reward_type": "regression",
+    "model_params": {"rliteee":{}}
+}
+
+test=predictor.BanditPredictor(ml_config)
+model = test.build_model
+model.select_model(uid=3,model_id="model_rliteee_v1",topN=2)
