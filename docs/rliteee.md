@@ -33,7 +33,7 @@ test = train(
 ![train logs](../resources/rliteee_train.jpg)
 
 ## 模型预测
-
+```
 from banditrl.serving import predictor
 
 ml_config = {
@@ -54,3 +54,4 @@ ml_config = {
 test=predictor.BanditPredictor(ml_config)
 model = test.build_model
 model.select_model(uid=3,model_id="model_rliteee_v1",topN=2)
+```
