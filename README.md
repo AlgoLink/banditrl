@@ -70,3 +70,7 @@ pip install .
 ```
 
 [Get started](DOCS.md)
+
+### Contextual Free(User model)
+
+[Epsilon Greedy policy bandit(RliteEE)](docs/rliteee.md)
