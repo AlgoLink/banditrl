@@ -5,6 +5,7 @@ import pickle
 import os
 import shutil
 import time
+import json
 
 from ..utils import feature_importance, model_constructors, utils,offline_model_trainers
 from ..preprocessing import preprocessor
@@ -66,6 +67,7 @@ def train(
             dense_features_to_use,
         )
         X, y = preprocessor.data_to_pytorch(data)
+        _,context_dim = X["X_float"].shape
     model_type = ml_config["model_type"]
     model_id = ml_config.get("model_id", None)
     model_params = ml_config["model_params"][model_type]
@@ -122,11 +124,13 @@ def train(
         his_context_storage = MemoryHistoryStorage()
         
     # action storage
-    if storage["action"].get("type","rlite")=="rlite":
+    if storage["action"].get("type","mem")=="rlite":
         dbpath = storage["action"].get("path",os.path.join(os.getcwd(),"action.db"))
         action_storage=RliteActionStorage(dbpath)
     else:
         action_storage = MemoryActionStorage()
+        _n_actions = model_params.get("n_actions")
+        action_storage.add([Action(i) for i in range(_n_actions)])
         
     if model_type == "rliteee":
         model = model_constructors.build_rliteee_model(rlite_path,model_id=model_id)
@@ -139,18 +143,20 @@ def train(
                                                    model_id= model_id)
 
     elif model_type == "linucb_array":
+        _dim = model_params.get("context_dim") or context_dim
         model = model_constructors.build_linucb_array_model(his_context_storage,
                                                             model_storage,
                                                             action_storage,
                                                             n_actions = model_params.get("n_actions"),
-                                                            context_dim = model_params.get("context_dim"),
+                                                            context_dim = _dim,
                                                             alpha=model_params.get("alpha",0.2),
                                                             model_id=model_id)
     elif model_type == "linucb_dict":
+        _dim = model_params.get("context_dim") or context_dim
         model = model_constructors.build_linucb_dict_model(his_context_storage,
                                                            model_storage,
                                                            action_storage,
-                                                           context_dim = model_params.get("context_dim"),
+                                                           context_dim = _dim,
                                                            alpha= model_params.get("alpha",0.2),
                                                            model_id= model_id)
         
@@ -196,16 +202,17 @@ def train(
     elif model_type == "linucb_array":
         for index,rows in training_df.iterrows():
             decision = rows['decision']
-            context = X['X_float'][index].numpy()
+            context = X['X_float'][index].numpy().reshape(1,-1)
+            
             reward = float(y[index])
             request_id = "{}_{}".format(index,model_id)
-            model.get_action(context,topN=1,request_id=request_id,model_id = model_id)
+            model.get_action(context,len_list=1,request_id=request_id,model_id = model_id)
             action = itemid_to_action[decision]
             model.reward(request_id, int(action), float(reward),model_id=model_id)
         
     elif model_type == "linucb_dict":
         for index,rows in training_df.iterrows():
-            context = X['X_float'][index].numpy()
+            context = X['X_float'][index].numpy().tolist()
             reward = float(y[index])
             request_id = "{}_{}".format(index,model_id)            
             decision = rows['decision']
@@ -224,7 +231,7 @@ def train(
             y=y,
             train_percent=ml_config["train_percent"],
         )
-        
+
     predictor_save_dir = ml_config["storage"].get("predictor_save_dir")
     if predictor_save_dir is not None:
         logger.info("Saving predictor artifacts to disk...")
@@ -235,12 +242,15 @@ def train(
             os.makedirs(save_dir)
         predictor_net_path = f"{save_dir}/{model_id}_model.pt"
         predictor_config_path = f"{save_dir}/{model_id}_features.pkl"
+        model_meta_path = f"{save_dir}/{model_id}_meta.json"
         if ml_config["features"].get("context_free", False): 
             with open(predictor_net_path, "wb") as f:
                 pickle.dump(predictor, f)
         else:
             predictor.config_to_file(predictor_config_path)
-            predictor.model_to_file(predictor_net_path)
+            #predictor.model_to_file(predictor_net_path)
+            with open(model_meta_path,"w") as f:
+                json.dump({"context_dim":context_dim}, f)
         shutil.make_archive(save_dir, "zip", save_dir)
 
     logger.info(f"Traning took {time.time() - start} seconds.")

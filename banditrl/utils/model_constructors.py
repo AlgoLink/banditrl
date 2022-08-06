@@ -73,7 +73,7 @@ def build_linucb_array_model(his_context_storage,
     return Linucb(history_storage= his_context_storage,
                   model_storage= model_storage,
                   action_storage= action_storage,
-                  context_dim= n_actions,
+                  n_actions= n_actions,
                   dim= context_dim, 
                   epsilon= alpha,
                   model_id= model_id)

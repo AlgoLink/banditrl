@@ -76,3 +76,6 @@ pip install .
 [Epsilon Greedy policy bandit(RliteEE)](docs/rliteee.md)
 
 [Bernoulli Thompson Sampling Policy bandit(BTS)](docs/bts.md)
+
+### Contextual Bandits
+[Linear bandit(LinUCB)](docs/linucb_array.md)
