@@ -69,7 +69,7 @@ test=train(
 from banditrl.serving import predictor
 
 ml_config = {
-    "model_id": "model_linucb_v2.1",
+    "model_id": "model_logistic_v1",
     "storage":{
         "model":{"type":"rlite", "path":"model.db"},
         "his_context":{"type":"rlite", "path":"his_context.db"},
@@ -86,28 +86,23 @@ ml_config = {
         "keep_only_top_n": True,
         "n": 10
     },
-    "model_type": "linucb_array",
-    "reward_type": "regression",
+    "model_type": "logisticucb",
+    "reward_type": "binary",
     "model_params": {
-        "linucb_array":{"context_dim":1, "n_actions":2}
+        "logisticucb":{"context_dim":None, "n_actions":2}
     }
 }
-
 test=predictor.BanditPredictor(ml_config)
-request_id = "test_predict1"
-model_id = "model_linucb_v2.1"
-_features = {"country": "usa", "year": 1999}
-test.get_action(_features,request_id,model_id,topN=2,auto_feature=True)
 
+request_id = "test_predict3"
+model_id = "model_logistic_v1"
+_features = {"country": "usa", "year": 1999}
+recom = test.get_action(_features,request_id,model_id,2)
 response:
 ['female', 'male']
 ```
 实时反馈
 
 ```
-request_id='test_predict1'
-action='male'
-reward = 178
-model_id="model_linucb_v2.1"
-test.reward(request_id,action,reward, model_id)
+test.reward(request_id="test_predict3",action="female",reward=1.0, model_id="model_logistic_v1")
 ````
