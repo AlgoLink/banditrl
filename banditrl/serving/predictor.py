@@ -43,6 +43,7 @@ class BanditPredictor:
             with open(model_meta_path, "rb") as f:
                 self.model_meta = json.load(f)
             self.action_to_itemid=self.model_meta.get("action_to_itemid")
+            self.itemid_to_action=self.model_meta.get("itemid_to_action")
         # model storage
         storage = self.ml_config["storage"]
         if storage["model"].get("type","rlite")=="rlite":
@@ -126,3 +127,9 @@ class BanditPredictor:
             except:
                 recom_list=[self.action_to_itemid.get(i.action.id) for i in recoms]
         return recom_list
+    
+    def reward(self,request_id,action,reward, model_id):
+        if self.model_type=="linucb_array":
+            actionid=self.itemid_to_action.get(action)
+            self.model.reward(request_id, int(actionid), float(reward),model_id=model_id)
+        return True

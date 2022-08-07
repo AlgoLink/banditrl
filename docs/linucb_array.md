@@ -105,5 +105,9 @@ response:
 实时反馈
 
 ```
-model.reward_model(model="male",uid=3,model_id="model_rliteee_v1",reward=156.0)
+request_id='test_predict1'
+action='male'
+reward = 178
+model_id="model_linucb_v2.1"
+test.reward(request_id,action,reward, model_id)
 ````
