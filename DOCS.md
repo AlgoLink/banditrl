@@ -22,4 +22,4 @@ Sample records:
 
 我们经常使用机器学习来做决定，而不是预测。
 
-![decision_graph](../resources/decision_graph.jpg)
+![decision_graph](./resources/decision_graph.jpg)
