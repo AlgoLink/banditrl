@@ -248,9 +248,13 @@ def train(
                 pickle.dump(predictor, f)
         else:
             predictor.config_to_file(predictor_config_path)
+            action_to_itemid = dict(zip(itemid_to_action.values(), itemid_to_action.keys()))
             #predictor.model_to_file(predictor_net_path)
             with open(model_meta_path,"w") as f:
-                json.dump({"context_dim":context_dim}, f)
+                json.dump({"context_dim":context_dim,
+                           "itemid_to_action":itemid_to_action,
+                           "action_to_itemid":action_to_itemid,
+                           "n_actions":_n_actions}, f)
         shutil.make_archive(save_dir, "zip", save_dir)
 
     logger.info(f"Traning took {time.time() - start} seconds.")

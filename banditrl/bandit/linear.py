@@ -457,6 +457,7 @@ class LinTS(BaseBandit):
 
         predicted_rewards = (context @ theta_sampled).flatten()
         recommendation_ids = predicted_rewards.argsort()[::-1][: len_list].tolist()
+
         recommendations = []  # pylint: disable=redefined-variable-type
         for action_id in recommendation_ids:
             recommendations.append(self._recommendation_cls(

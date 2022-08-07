@@ -1,6 +1,6 @@
 from sklearn import ensemble, linear_model
-from ..bandit import RliteEE,LinTS,Linucb,LinEE,LinUCB,UCB1,BTS
-
+from ..bandit import RliteEE,LinTS,LinEE,LinUCB,UCB1,BTS
+from ..bandit import linear
 
 def build_gbdt(reward_type, learning_rate=0.1, n_estimators=100, max_depth=3):
     is_classification = reward_type == "binary"
@@ -70,13 +70,13 @@ def build_linucb_array_model(his_context_storage,
                              alpha=0.2,
                              model_id=None):
 
-    return Linucb(history_storage= his_context_storage,
-                  model_storage= model_storage,
-                  action_storage= action_storage,
-                  n_actions= n_actions,
-                  dim= context_dim, 
-                  epsilon= alpha,
-                  model_id= model_id)
+    return linear.LinUCB(history_storage= his_context_storage,
+                         model_storage= model_storage,
+                         action_storage= action_storage,
+                         n_actions= n_actions,
+                         dim= context_dim, 
+                         epsilon= alpha,
+                         model_id= model_id)
 
 def build_linucb_dict_model(his_context_storage,
                             model_storage,

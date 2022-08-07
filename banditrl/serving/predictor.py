@@ -2,6 +2,7 @@ from ..preprocessing import preprocessor
 from ..preprocessing.feature_encodings import BanditContextEncoder
 from ..utils import model_constructors,utils
 import os
+import json
 
 from ..storage import (
     MemoryHistoryStorage,
@@ -18,14 +19,30 @@ logger = utils.get_logger(__name__)
 
 class BanditPredictor:
     """Class used to make predictions given a trained bandit model including reward."""
-    def __init__(self,ml_config):
+    def __init__(self,ml_config={}):
         self.ml_config = ml_config
+        self.model=self.build_model
+        self.model_type=ml_config.get("model_type")
+        predictor_save_dir = self.ml_config["storage"].get("predictor_save_dir")
+        if predictor_save_dir is not None:
+            self.feature_transformer = self.build_feature_transformer
+        
+
     @property
     def build_model(self):
         model_type = self.ml_config["model_type"]
-        model_id = self.ml_config.get("model_id", None)
+        model_id = self.ml_config.get("model_id")
         model_params = self.ml_config["model_params"][model_type]
         reward_type = self.ml_config["reward_type"]
+        predictor_save_dir = self.ml_config["storage"].get("predictor_save_dir")
+        if predictor_save_dir is not None:
+            logger.info("loading model saved meta from disk...")
+            model_id = self.ml_config.get("model_id", "model")
+            save_dir = f"{predictor_save_dir}/{model_id}/"
+            model_meta_path = f"{save_dir}/{model_id}_meta.json"
+            with open(model_meta_path, "rb") as f:
+                self.model_meta = json.load(f)
+            self.action_to_itemid=self.model_meta.get("action_to_itemid")
         # model storage
         storage = self.ml_config["storage"]
         if storage["model"].get("type","rlite")=="rlite":
@@ -48,11 +65,13 @@ class BanditPredictor:
             his_context_storage = MemoryHistoryStorage()
         
         # action storage
-        if storage["action"].get("type","rlite")=="rlite":
+        if storage["action"].get("type","mem")=="rlite":
             dbpath = storage["action"].get("path",os.path.join(os.getcwd(),"action.db"))
             action_storage=RliteActionStorage(dbpath)
         else:
             action_storage = MemoryActionStorage()
+            n_actions = self.model_meta.get("n_actions")
+            action_storage.add([Action(i) for i in range(n_actions)])
         
         if model_type == "rliteee":
             model = model_constructors.build_rliteee_model(rlite_path,model_id=model_id)
@@ -94,3 +113,16 @@ class BanditPredictor:
             return feature_transformer.predict
         else:
             return None
+        
+    def get_action(self,feature={}, request_id=None, model_id=None, topN=1, auto_feature=True):
+        if self.model_type=="linucb_array":
+            if auto_feature:
+                features = self.feature_transformer(feature)["pytorch_input"]["X_float"].numpy()
+            else:
+                features = feature
+            recoms = self.model.get_action(features,topN,request_id,model_id)
+            try:
+                recom_list=[self.action_to_itemid.get(str(i.action.id)) for i in recoms]
+            except:
+                recom_list=[self.action_to_itemid.get(i.action.id) for i in recoms]
+        return recom_list
