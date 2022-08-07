@@ -45,11 +45,12 @@ Models supported:
   - [x] Linear bandit(LinUCB)
   - [x] Linear Thompson Sampling bandit(LinTS)
   - [x] ε-greedy (LinEpsilonGreedy)
+  - [x] Logistic bandit(Logistic Upper Confidence Bound-LogisticUCB)
 - Contextual Free(User model)
   - [x] Epsilon Greedy policy bandit(RliteEE)
   - [x] Bernoulli Thompson Sampling Policy bandit(BTS) [(via. Thompson Sampling
 )](https://towardsdatascience.com/thompson-sampling-fc28817eacb8)
-  - [x] Logistic bandit(Logistic Upper Confidence Bound-LogisticUCB)
+
 ## 当前支持的特征类型
 
 <b>4</b> feature types supported:
