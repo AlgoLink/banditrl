@@ -69,23 +69,38 @@ test=train(
 from banditrl.serving import predictor
 
 ml_config = {
-    "model_id": "model_rliteee_v1",
+    "model_id": "model_linucb_v2.1",
     "storage":{
-        "model":{"type":"rlite",
-                 "path":"model.db"},
-        "his_context":{},
+        "model":{"type":"rlite", "path":"model.db"},
+        "his_context":{"type":"rlite", "path":"his_context.db"},
         "action":{},
-        "predictor_save_dir":None
+        "predictor_save_dir":"models"
     },
-    "features":{"context_free":True},
-    "model_type": "rliteee",
+    "features": {
+        "context_free":False,
+        "features_to_use": ["*"],
+        "dense_features_to_use": ["*"]
+    },
+    "feature_importance": {
+        "calc_feature_importance": False,
+        "keep_only_top_n": True,
+        "n": 10
+    },
+    "model_type": "linucb_array",
     "reward_type": "regression",
-    "model_params": {"rliteee":{}}
+    "model_params": {
+        "linucb_array":{"context_dim":1, "n_actions":2}
+    }
 }
 
 test=predictor.BanditPredictor(ml_config)
-model = test.build_model
-model.select_model(uid=3,model_id="model_rliteee_v1",topN=2)
+request_id = "test_predict1"
+model_id = "model_linucb_v2.1"
+_features = {"country": "usa", "year": 1999}
+test.get_action(_features,request_id,model_id,topN=2,auto_feature=True)
+
+response:
+['female', 'male']
 ```
 实时反馈
 
