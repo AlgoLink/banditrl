@@ -23,3 +23,9 @@ Sample records:
 我们经常使用机器学习来做决定，而不是预测。
 
 ![decision_graph](./resources/decision_graph.jpg)
+
+## 数据的生成过程(Contextual bandit setting)
+
+a  `policy` interacts with environment and produces the `log data` valuable for `redesigning the system`.
+
+![data_gen_process](./resources/data_gen_process.png)
