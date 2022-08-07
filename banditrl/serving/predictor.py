@@ -133,7 +133,7 @@ class BanditPredictor:
             return None
         
     def get_action(self,feature={}, request_id=None, model_id=None, topN=1, auto_feature=True):
-        if self.model_type=="linucb_array":
+        if self.model_type in ("linucb_array","logisticucb"):
             if auto_feature:
                 features = self.feature_transformer(feature)["pytorch_input"]["X_float"].numpy()
             else:
@@ -146,7 +146,7 @@ class BanditPredictor:
         return recom_list
     
     def reward(self,request_id,action,reward, model_id):
-        if self.model_type=="linucb_array":
+        if self.model_type in ("linucb_array","logisticucb"):
             actionid=self.itemid_to_action.get(action)
             self.model.reward(request_id, int(actionid), float(reward),model_id=model_id)
         return True
