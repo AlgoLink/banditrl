@@ -20,7 +20,7 @@ Sample records:
 ```
 ## 用于决策的机器学习(Bandit/RL)
 
-我们经常使用机器学习来做决定，而不是预测。
+我们经常使用机器学习来做<font color="#dd0000">`决策`：</font> ，而<font color="#00dddd">`不是预测`</font>。<br>
 
 ![decision_graph](./resources/decision_graph.jpg)
 
