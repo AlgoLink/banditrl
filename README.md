@@ -49,7 +49,7 @@ Models supported:
   - [x] Epsilon Greedy policy bandit(RliteEE)
   - [x] Bernoulli Thompson Sampling Policy bandit(BTS) [(via. Thompson Sampling
 )](https://towardsdatascience.com/thompson-sampling-fc28817eacb8)
-
+  - [x] Logistic bandit(Logistic Upper Confidence Bound-LogisticUCB)
 ## 当前支持的特征类型
 
 <b>4</b> feature types supported:
@@ -79,3 +79,5 @@ pip install .
 
 ### Contextual Bandits
 [Linear bandit(LinUCB)](docs/linucb_array.md)
+
+Logistic bandit(Logistic Upper Confidence Bound-LogisticUCB)
