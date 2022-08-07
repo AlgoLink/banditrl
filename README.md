@@ -81,4 +81,4 @@ pip install .
 ### Contextual Bandits
 [Linear bandit(LinUCB)](docs/linucb_array.md)
 
-Logistic bandit(Logistic Upper Confidence Bound-LogisticUCB)
+[Logistic bandit(Logistic Upper Confidence Bound-LogisticUCB)](docs/logistic_ucb.md)
