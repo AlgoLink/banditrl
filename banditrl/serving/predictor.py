@@ -44,6 +44,8 @@ class BanditPredictor:
                 self.model_meta = json.load(f)
             self.action_to_itemid=self.model_meta.get("action_to_itemid")
             self.itemid_to_action=self.model_meta.get("itemid_to_action")
+            self.context_dim = self.model_meta.get("context_dim")
+            self.n_actions = self.model_meta.get("n_actions")
         # model storage
         storage = self.ml_config["storage"]
         if storage["model"].get("type","rlite")=="rlite":
@@ -85,21 +87,36 @@ class BanditPredictor:
                                                        model_id= model_id)
 
         elif model_type == "linucb_array":
+            _n_actions = model_params.get("n_actions") or n_actions
+            _dim = model_params.get("context_dim") or self.context_dim
             model = model_constructors.build_linucb_array_model(his_context_storage,
                                                                 model_storage,
                                                                 action_storage,
-                                                                n_actions = model_params.get("n_actions"),
-                                                                context_dim = model_params.get("context_dim"),
+                                                                n_actions = _n_actions,
+                                                                context_dim = _dim,
                                                                 alpha=model_params.get("alpha",0.2),
                                                                 model_id=model_id)
         elif model_type == "linucb_dict":
+            _dim = model_params.get("context_dim") or self.context_dim
             model = model_constructors.build_linucb_dict_model(his_context_storage,
                                                                model_storage,
                                                                action_storage,
-                                                               context_dim = model_params.get("context_dim"),
+                                                               context_dim = _dim,
                                                                alpha= model_params.get("alpha",0.2),
                                                                model_id= model_id)
             
+        elif model_type == "logisticucb":
+            _n_actions = model_params.get("n_actions") or n_actions
+            _dim = model_params.get("context_dim") or self.context_dim
+            model = model_constructors.build_logisticucb_model(his_context_storage,
+                                                               model_storage,
+                                                               action_storage,
+                                                               n_actions = _n_actions,
+                                                               context_dim=_dim,
+                                                               epsilon =model_params.get("epsilon",0.2),
+                                                               alpha_ = model_params.get("alpha",1.0),
+                                                               lambda_ = model_params.get("lambda",1.0),
+                                                               model_id= model_id)
         return model
 
     @property

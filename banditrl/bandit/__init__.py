@@ -10,6 +10,7 @@ from .usermodel import RliteEE,BTS
 from .linear import LinUCB as Linucb
 from .linear import LinTS
 from .linear import LinEpsilonGreedy as LinEE
+from .logistic import LogisticUCB
 
 __all__ = [
     'Exp3', 
@@ -21,4 +22,5 @@ __all__ = [
     'BTS',
     'Linucb',
     'LinEE',
-    'LinTS']
+    'LinTS',
+    'LogisticUCB']

@@ -160,6 +160,18 @@ def train(
                                                            alpha= model_params.get("alpha",0.2),
                                                            model_id= model_id)
         
+        
+    elif model_type == "logisticucb":
+        _dim = model_params.get("context_dim") or context_dim
+        model = model_constructors.build_logisticucb_model(his_context_storage,
+                                                           model_storage,
+                                                           action_storage,
+                                                           n_actions = model_params.get("n_actions"),
+                                                           context_dim=_dim,
+                                                           epsilon =model_params.get("epsilon",0.2),
+                                                           alpha_ = model_params.get("alpha",1.0),
+                                                           lambda_ = model_params.get("lambda",1.0),
+                                                           model_id= model_id)
     # build the predictor
     if ml_config["features"].get("context_free", False):
         predictor = model
@@ -221,6 +233,18 @@ def train(
             action = itemid_to_action[decision]
             model.get_action(_context, n_actions=1,request_id=request_id,model_id=model_id)
             model.reward(history_id=request_id, rewards={int(action):reward},model_id=model_id)
+
+    elif model_type == "logisticucb":
+        for index,rows in training_df.iterrows():
+            decision = rows['decision']
+            context = X['X_float'][index].numpy().reshape(1,-1)
+            
+            reward = float(y[index])
+            request_id = "{}_{}".format(index,model_id)
+
+            model.get_action(context,len_list=1,request_id=request_id,model_id = model_id)
+            action = itemid_to_action[decision]
+            model.reward(request_id, int(action), float(reward),model_id=model_id)
 
     elif model_type in ("gbdt_bandit", "random_forest_bandit", "linear_bandit"):
         logger.info(f"Training {model_type}")

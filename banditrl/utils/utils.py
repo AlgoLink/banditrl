@@ -13,6 +13,7 @@ VALID_MODEL_TYPES = (
     "bts",
     "lints",
     "linee",
+    "logisticucb"
 )
 VALID_REWARD_TYPES = ("regression", "binary")
 
