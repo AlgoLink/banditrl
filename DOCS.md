@@ -29,3 +29,9 @@ Sample records:
 a  `policy` interacts with environment and produces the `log data` valuable for `redesigning the system`.
 
 ![data_gen_process](./resources/data_gen_process.png)
+
+## 实时记录bandit的反馈信息
+
+a behavior (or past) policy gives us `logged bandit feedback`.
+
+![logged_data](./resources/logged_data.jpg)
