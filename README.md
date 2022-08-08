@@ -43,7 +43,7 @@ Models supported:
 
 - Contextual Bandits
   - [x] [Linear bandit(LinUCB)](https://dl.acm.org/doi/abs/10.1145/1772690.1772758)
-  - [x] Linear Thompson Sampling bandit(LinTS)
+  - [x] [Linear Thompson Sampling bandit(LinTS)](http://proceedings.mlr.press/v28/agrawal13)
   - [x] ε-greedy (LinEpsilonGreedy)
   - [x] Logistic bandit(Logistic Upper Confidence Bound-LogisticUCB)
 - Contextual Free(User model)
