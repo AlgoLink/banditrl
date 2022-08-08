@@ -172,6 +172,40 @@ def train(
                                                            alpha_ = model_params.get("alpha",1.0),
                                                            lambda_ = model_params.get("lambda",1.0),
                                                            model_id= model_id)
+    elif model_type == "linear_bandit":
+        assert utils.pset_features_have_dense(feature_config["features"]), (
+            "Linear models require that product set features have associated"
+            "dense representations."
+        )
+        model = model_constructors.build_linear_model(
+            reward_type=reward_type,
+            penalty=model_params.get("penalty",0.8),
+            alpha=model_params.get("alpha",0.2),
+        )
+        model_spec = None
+    elif model_type == "gbdt_bandit":
+        assert utils.pset_features_have_dense(feature_config["features"]), (
+            "GBDT models require that product set features have associated"
+            "dense representations."
+        )
+        model = model_constructors.build_gbdt(
+            reward_type=reward_type,
+            learning_rate=model_params.get("learning_rate",0.1),
+            n_estimators=model_params.get("n_estimators",5),
+            max_depth=model_params.get("max_depth",4),
+        )
+        model_spec = None
+    elif model_type == "random_forest_bandit":
+        assert utils.pset_features_have_dense(feature_config["features"]), (
+            "Random forest models require that product set features have associated"
+            "dense representations."
+        )
+        model = model_constructors.build_random_forest(
+            reward_type=reward_type,
+            n_estimators=model_params.get("n_estimators",5),
+            max_depth=model_params.get("max_depth",4),
+        )
+        model_spec = None
     # build the predictor
     if ml_config["features"].get("context_free", False):
         predictor = model

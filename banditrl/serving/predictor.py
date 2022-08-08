@@ -133,7 +133,13 @@ class BanditPredictor:
         else:
             return None
         
-    def get_action(self,feature={}, request_id=None, model_id=None, topN=1, auto_feature=True):
+    def get_action(self,
+                   feature={}, 
+                   request_id=None,
+                   model_id=None,
+                   topN=1,uid=None,
+                   auto_feature=True,
+                   user_model=True):
         if self.model_type in ("linucb_array","logisticucb"):
             if auto_feature:
                 features = self.feature_transformer(feature)["pytorch_input"]["X_float"].numpy()
@@ -156,6 +162,15 @@ class BanditPredictor:
                 recom_list=[self.action_to_itemid.get(str(i.action.id)) for i in recoms]
             except:
                 recom_list=[self.action_to_itemid.get(i.action.id) for i in recoms]
+                
+        elif model_type == "rliteee":
+            recom_list = self.model.select_model(uid=uid,model_id=model_id,topN=topN)
+        elif model_type == "bts":
+            if user_model:
+                uid_model=f"{uid}_{model_id}"
+                recom_list = self.model.get_action(topN= topN,model_id= uid_model)
+            else:
+                recom_list = self.model.get_action(topN= topN,model_id= model_id)
 
         return recom_list
     
@@ -163,4 +178,16 @@ class BanditPredictor:
         if self.model_type in ("linucb_array","logisticucb"):
             actionid=self.itemid_to_action.get(action)
             self.model.reward(request_id, int(actionid), float(reward),model_id=model_id)
+        elif self.model_type=="linucb_dict":
+            actionid=self.itemid_to_action.get(action)
+            rewards = {int(actionid):float(reward)}
+            self.model.reward(history_id=request_id, rewards=rewards,model_id=model_id)
+        elif self.model_type=="rliteee":
+            self.model.reward_model(model=action,uid=uid,model_id=model_id,reward=reward)
+        elif self.model_type=="bts":
+            if user_model:
+                uid_model=f"{uid}_{model_id}"
+            else:
+                uid_model = model_id
+            self.model.reward(action = action,reward=reward,model_id=uid_model)
         return True
