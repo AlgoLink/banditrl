@@ -75,6 +75,7 @@ class BanditPredictor:
             action_storage = MemoryActionStorage()
             n_actions = self.model_meta.get("n_actions")
             action_storage.add([Action(i) for i in range(n_actions)])
+        self.action_storage = action_storage
         
         if model_type == "rliteee":
             model = model_constructors.build_rliteee_model(rlite_path,model_id=model_id)
@@ -143,6 +144,19 @@ class BanditPredictor:
                 recom_list=[self.action_to_itemid.get(str(i.action.id)) for i in recoms]
             except:
                 recom_list=[self.action_to_itemid.get(i.action.id) for i in recoms]
+        elif self.model_type=="linucb_dict":
+            if auto_feature:
+                features = self.feature_transformer(feature)["pytorch_input"]["X_float"].numpy()
+            else:
+                features = feature
+            _context = {action_id: features for action_id in self.action_storage.iterids()}
+            _,recoms = self.model.get_action(_context,topN,request_id,model_id)
+
+            try:
+                recom_list=[self.action_to_itemid.get(str(i.action.id)) for i in recoms]
+            except:
+                recom_list=[self.action_to_itemid.get(i.action.id) for i in recoms]
+
         return recom_list
     
     def reward(self,request_id,action,reward, model_id):
