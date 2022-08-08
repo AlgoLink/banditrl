@@ -73,8 +73,9 @@ class BanditPredictor:
             action_storage=RliteActionStorage(dbpath)
         else:
             action_storage = MemoryActionStorage()
-            n_actions = self.model_meta.get("n_actions")
-            action_storage.add([Action(i) for i in range(n_actions)])
+            if not self.ml_config["features"].get("context_free", False):
+                n_actions = self.model_meta.get("n_actions")
+                action_storage.add([Action(i) for i in range(n_actions)])
         self.action_storage = action_storage
         
         if model_type == "rliteee":
@@ -163,9 +164,9 @@ class BanditPredictor:
             except:
                 recom_list=[self.action_to_itemid.get(i.action.id) for i in recoms]
                 
-        elif model_type == "rliteee":
+        elif self.model_type == "rliteee":
             recom_list = self.model.select_model(uid=uid,model_id=model_id,topN=topN)
-        elif model_type == "bts":
+        elif self.model_type == "bts":
             if user_model:
                 uid_model=f"{uid}_{model_id}"
                 recom_list = self.model.get_action(topN= topN,model_id= uid_model)

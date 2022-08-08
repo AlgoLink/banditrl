@@ -129,8 +129,9 @@ def train(
         action_storage=RliteActionStorage(dbpath)
     else:
         action_storage = MemoryActionStorage()
-        _n_actions = model_params.get("n_actions")
-        action_storage.add([Action(i) for i in range(_n_actions)])
+        if not ml_config["features"].get("context_free", False):
+            _n_actions = model_params.get("n_actions")
+            action_storage.add([Action(i) for i in range(_n_actions)])
         
     if model_type == "rliteee":
         model = model_constructors.build_rliteee_model(rlite_path,model_id=model_id)
