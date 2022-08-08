@@ -42,7 +42,7 @@ banditrl提供了核心的上下文bandit算法，以及一些常见的存储操
 Models supported:
 
 - Contextual Bandits
-  - [x] Linear bandit(LinUCB)
+  - [x] [Linear bandit(LinUCB)](https://dl.acm.org/doi/abs/10.1145/1772690.1772758)
   - [x] Linear Thompson Sampling bandit(LinTS)
   - [x] ε-greedy (LinEpsilonGreedy)
   - [x] Logistic bandit(Logistic Upper Confidence Bound-LogisticUCB)
