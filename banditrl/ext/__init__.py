@@ -1,5 +1,1 @@
-from .duckdb_engine import dbEngine
-
-__all__=[
-    "dbEngine"
-]
+from .tinyflux import TagQuery, FieldQuery, MeasurementQuery, TimeQuery

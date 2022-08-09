@@ -44,6 +44,8 @@ setup(
         'banditrl.storage',
         'banditrl.utils',
         'banditrl.ext',
+        'banditrl.ext.tinydb',
+        'banditrl.ext.tinyflux',
         'banditrl.training',
         'banditrl.serving'
     ],
@@ -54,6 +56,8 @@ setup(
         'banditrl.utils': 'banditrl/utils',
         'banditrl.preprocessing':'banditrl/preprocessing',
         'banditrl.ext': 'banditrl/ext',
+        'banditrl.ext.tinydb': 'banditrl/ext/tinydb',
+        'banditrl.ext.tinyflux': 'banditrl/ext/tinyflux',
         'banditrl.training': 'banditrl/training',
         'banditrl.serving': 'banditrl/serving'
     },

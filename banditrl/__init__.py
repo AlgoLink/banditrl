@@ -11,5 +11,5 @@ storage
 import pkg_resources
 
 
-__all__ = ['bandit', 'storage','preprocessing']
+__all__ = ['bandit', 'storage','preprocessing','ext']
 __version__ = pkg_resources.get_distribution('banditrl').version

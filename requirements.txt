@@ -3,6 +3,6 @@ numpy
 scipy
 scikit-learn
 matplotlib
-
+tinyflux
 pylint
 tox
