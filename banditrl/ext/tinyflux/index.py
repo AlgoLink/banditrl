@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 import operator
 from typing import Dict, Iterable, List, Optional, Set, Tuple
 
-from tinyflux.queries import SimpleQuery, CompoundQuery, Query
+from .queries import SimpleQuery, CompoundQuery, Query
 from .point import FieldValue, Point
 from .utils import find_eq, find_lt, find_le, find_gt, find_ge
 
@@ -662,8 +662,7 @@ class Index:
 
             if query.point_attr == "_fields":
                 return IndexResult(self._search_fields(query), self._num_items)
-
-            raise TypeError("Query must be SimpleQuery or CompoundQuery.")
+        raise TypeError("Query must be SimpleQuery or CompoundQuery.")
 
     def _search_measurement(self, query: SimpleQuery) -> Set[int]:
         """Search the index for measurement matches.
