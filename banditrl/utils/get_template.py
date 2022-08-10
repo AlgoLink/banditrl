@@ -18,8 +18,20 @@ def config_template_gen(config_type="ml"):
             "n": 10
         }
         config_contents["model_type"]="linear_bandit"
+        config_contents["MODEL_TYPES"] = (
+            "rliteee",
+            "linucb_dict",
+            "linucb_array",
+            "bts",
+            "lints",
+            "linee",
+            "logisticucb",
+            "gbdt_bandit",
+            "random_forest_bandit",
+            "linear_bandit"
+        )
         config_contents["reward_type"] = "binary"
-        config_contents["reward_types"] = "binary,regression"
+        config_contents["REWARD_TYPES"] = ("regression", "binary")
         config_contents["model_params"]  ={ "linear_bandit":{"context_dim":None, "n_actions":2}}
         config_contents["train_percent"] = 0.8
         config_contents["version"] = 1.0
