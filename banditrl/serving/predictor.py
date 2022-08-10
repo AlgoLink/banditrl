@@ -175,20 +175,30 @@ class BanditPredictor:
 
         return recom_list
     
-    def reward(self,request_id,action,reward, model_id):
+    def reward(self,request_id,action,reward, model_id,user_model=True):
         if self.model_type in ("linucb_array","logisticucb"):
             actionid=self.itemid_to_action.get(action)
-            self.model.reward(request_id, int(actionid), float(reward),model_id=model_id)
+            self.model.reward(request_id, 
+                              int(actionid), 
+                              float(reward),
+                              model_id=model_id)
         elif self.model_type=="linucb_dict":
             actionid=self.itemid_to_action.get(action)
             rewards = {int(actionid):float(reward)}
-            self.model.reward(history_id=request_id, rewards=rewards,model_id=model_id)
+            self.model.reward(history_id=request_id,
+                              rewards=rewards,
+                              model_id=model_id)
         elif self.model_type=="rliteee":
-            self.model.reward_model(model=action,uid=uid,model_id=model_id,reward=reward)
+            self.model.reward_model(model=action,
+                                    uid=uid,
+                                    model_id=model_id,
+                                    reward=reward)
         elif self.model_type=="bts":
             if user_model:
                 uid_model=f"{uid}_{model_id}"
             else:
                 uid_model = model_id
-            self.model.reward(action = action,reward=reward,model_id=uid_model)
+            self.model.reward(action = action,
+                              reward=reward,
+                              model_id=uid_model)
         return True
