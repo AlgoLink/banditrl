@@ -28,10 +28,15 @@ def config_template_gen(config_type="ml"):
             "model":{"type":"rlite", "path":"models/model.db"},
             "his_context":{"type":"rlite", "path":"models/his_context.db"},
             "action":{},
-            "predictor_save_dir":"models"
+            "predictor_save_dir":"models",
+            "log_path":False
+        }
+        config_contents["features"]= {
+            "context_free":False,
+            "features_to_use": ["*"],
+            "dense_features_to_use": ["*"]
         }
 
-        
     elif config_type=="feature":
         config_contents["config_type"]="feature"
         config_contents["version"] = 1.0

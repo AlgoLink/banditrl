@@ -23,10 +23,14 @@ class BanditPredictor:
         self.ml_config = ml_config
         self.model=self.build_model
         self.model_type=ml_config.get("model_type")
+        log_path = ml_config["storage"].get("log_path")
+        if log_path:
+            self.log_db = utils.log_data(log_path)
+        else:
+            self.log_db = None
         predictor_save_dir = self.ml_config["storage"].get("predictor_save_dir")
         if predictor_save_dir is not None:
             self.feature_transformer = self.build_feature_transformer
-        
 
     @property
     def build_model(self):
@@ -173,7 +177,18 @@ class BanditPredictor:
                 recom_list = self.model.get_action(topN= topN,model_id= uid_model)
             else:
                 recom_list = self.model.get_action(topN= topN,model_id= model_id)
-
+        if self.log_db is not None:
+            if len(recom_list)>0:
+                recom = str(recom_list[0])
+            else:
+                recom = ""
+            measurement = "predict"
+            tags = {"model_id":str(model_id),
+                    "request_id":str(request_id),
+                    "model_type":self.model_type,
+                    "recom":recom}
+            fields = {"topN":float(topN),"log_type": 4}
+            self.log_db.log_model_details(measurement,tags,fields)
         return recom_list
     
     def reward(self,request_id,action,reward, model_id,user_model=True):
@@ -202,4 +217,13 @@ class BanditPredictor:
             self.model.reward(action = action,
                               reward=reward,
                               model_id=uid_model)
+            
+        if self.log_db is not None:
+            measurement = "reward"
+            tags = {"model_id":str(model_id),
+                    "request_id":str(request_id),
+                    "model_type":self.model_type,
+                    "recom":str(action)}
+            fields = {"reward":float(reward),"log_type":2}
+            self.log_db.log_model_details(measurement,tags,fields)
         return True

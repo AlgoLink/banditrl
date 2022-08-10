@@ -3,6 +3,9 @@ import logging
 import math
 from typing import Dict, NoReturn
 import string
+from datetime import datetime, timezone
+from datetime import timedelta
+from banditrl.ext.tinyflux import TinyFlux, Point
 
 import pandas as pd
 
@@ -126,3 +129,34 @@ def pset_features_have_dense(features: Dict) -> NoReturn:
             if not meta["use_dense"]:
                 return False
     return True
+
+class log_data(object):
+    def __init__(self,db_path):
+        self.db = TinyFlux(db_path)
+    def log_model_details(self,measurement,tags,fields):
+        # Measurement name, a string.
+        measurement = measurement
+    
+        # Datetime object that is "timezone-aware".
+        #ts_naive = datetime.strptime(row[2], "%Y-%m-%d")
+        #ts_aware = ts_naive.replace(tzinfo=ZoneInfo("US/Pacific"))
+        utc_now = datetime.utcnow().replace(tzinfo=timezone.utc)
+        SHA_TZ = timezone(
+            timedelta(hours=8),
+            name='Asia/Shanghai',
+        )
+        ts_aware = utc_now.astimezone(SHA_TZ)
+
+        # Tags as a dict of string/string key values.
+        tags = tags
+        # Fields as a dict of string/numeric key values.
+        fields = fields
+        # Initialize the Point with the above attributes.
+        p = Point(
+            measurement=measurement,
+            time=ts_aware,
+            tags=tags,
+            fields=fields,
+        )
+        self.db.insert(p)
+        return p
