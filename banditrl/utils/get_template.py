@@ -24,6 +24,14 @@ def config_template_gen(config_type="ml"):
         config_contents["train_percent"] = 0.8
         config_contents["version"] = 1.0
         config_contents["config_type"]="ml"
+        config_contents["storage"]= {
+            "model":{"type":"rlite", "path":"models/model.db"},
+            "his_context":{"type":"rlite", "path":"models/his_context.db"},
+            "action":{},
+            "predictor_save_dir":"models"
+        }
+
+        
     elif config_type=="feature":
         config_contents["config_type"]="feature"
         config_contents["version"] = 1.0

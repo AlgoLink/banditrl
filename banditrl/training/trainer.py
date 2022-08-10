@@ -11,6 +11,7 @@ from ..utils import feature_importance, model_constructors, utils,offline_model_
 from ..preprocessing import preprocessor
 from ..preprocessing import feature_encodings
 
+from sklearn.model_selection import train_test_split
 
 from ..storage import (
     MemoryHistoryStorage,
@@ -34,6 +35,8 @@ def train(
     offline_train = True
 ):
     start = time.time()
+    if len(itemid_to_action)>0:
+        action_to_itemid = dict(zip(itemid_to_action.values(), itemid_to_action.keys()))
 
     utils.validate_ml_config(ml_config)
     _dbpath = ml_config["storage"]["model"].get("path",os.path.join(os.getcwd(),"model.db"))
@@ -247,6 +250,10 @@ def train(
                 uid_model = model_id
             model.reward(decision, reward=float(reward),model_id =uid_model,offline= offline_train)
     elif model_type == "linucb_array":
+        train_percent = ml_config.get("train_percent",0.8)
+        test_percent = 1- train_percent
+        train, test = train_test_split(training_df, test_size= test_percent)
+        logger.info(f"Training begin")
         for index,rows in training_df.iterrows():
             decision = rows['decision']
             context = X['X_float'][index].numpy().reshape(1,-1)
@@ -256,9 +263,42 @@ def train(
             model.get_action(context,len_list=1,request_id=request_id,model_id = model_id)
             action = itemid_to_action[decision]
             model.reward(request_id, int(action), float(reward),model_id=model_id)
+
+        logger.info(f"Training end")
+        logger.info(f"Testing begin")
+        cum_reward = 0
+        cum_correct=0
+        cum_n_actions = 0
+        for index,rows in test.iterrows():
+            df_context = rows["context"]
+            try:
+                feats = json.loads(df_context)
+            except:
+                feats = df_context
+            context = predictor.predict(feats, choices=None, get_ucb_scores=False, ext=False)
+            context = context['pytorch_input']['X_float'].numpy()
+            reward = float(rows["reward"])
+            request_id = "{}_{}".format(index,model_id)            
+            decision = rows['decision']
+            request_id = "test_{}_{}".format(index,model_id)
+            _context = {action_id: context for action_id in action_storage.iterids()}
+            recom = model.get_action(context,len_list=1,request_id=request_id,model_id = model_id)
+            predict_action = [action_to_itemid.get(int(i.action.id)) for i in recom][0]
+            cum_n_actions +=1
+            if str(predict_action)==str(decision):
+                cum_reward+= reward
+                cum_correct+=1
+        avg_correct = cum_correct/cum_n_actions
+        logger.info(utils.color_text(f"predictor's accuracy:{avg_correct}", color="blue"))
+        logger.info(utils.color_text(f"all actions:{cum_n_actions}", color="blue"))
+        logger.info(utils.color_text(f"cumulative rewards:{cum_reward}", color="blue"))
         
     elif model_type == "linucb_dict":
-        for index,rows in training_df.iterrows():
+        train_percent = ml_config.get("train_percent",0.8)
+        test_percent = 1- train_percent
+        train, test = train_test_split(training_df, test_size= test_percent)
+        logger.info(f"Training begin")
+        for index,rows in train.iterrows():
             context = X['X_float'][index].numpy().tolist()
             reward = float(y[index])
             request_id = "{}_{}".format(index,model_id)            
@@ -268,8 +308,40 @@ def train(
             action = itemid_to_action[decision]
             model.get_action(_context, n_actions=1,request_id=request_id,model_id=model_id)
             model.reward(history_id=request_id, rewards={int(action):reward},model_id=model_id)
+        logger.info(f"Training end")
+        logger.info(f"Testing begin")
+        cum_reward = 0
+        cum_correct=0
+        cum_n_actions = 0
+        for index,rows in test.iterrows():
+            df_context = rows["context"]
+            try:
+                feats = json.loads(df_context)
+            except:
+                feats = df_context
+            context = predictor.predict(feats, choices=None, get_ucb_scores=False, ext=False)
+            context = context['pytorch_input']['X_float'].numpy()
+            reward = float(rows["reward"])
+            request_id = "{}_{}".format(index,model_id)            
+            decision = rows['decision']
+            request_id = "test_{}_{}".format(index,model_id)
+            _context = {action_id: context for action_id in action_storage.iterids()}
+            _,recom = model.get_action(_context, n_actions=1,request_id=request_id,model_id=model_id)
+            predict_action = [action_to_itemid.get(int(i.action.id)) for i in recom][0]
+            cum_n_actions +=1
+            if str(predict_action)==str(decision):
+                cum_reward+= reward
+                cum_correct+=1
+        avg_correct = cum_correct/cum_n_actions
+        logger.info(utils.color_text(f"predictor's accuracy:{avg_correct}", color="blue"))
+        logger.info(utils.color_text(f"all actions:{cum_n_actions}", color="blue"))
+        logger.info(utils.color_text(f"cumulative rewards:{cum_reward}", color="blue"))
 
     elif model_type == "logisticucb":
+        train_percent = ml_config.get("train_percent",0.8)
+        test_percent = 1- train_percent
+        train, test = train_test_split(training_df, test_size= test_percent)
+        logger.info(f"Training begin")
         for index,rows in training_df.iterrows():
             decision = rows['decision']
             context = X['X_float'][index].numpy().reshape(1,-1)
@@ -280,6 +352,35 @@ def train(
             model.get_action(context,len_list=1,request_id=request_id,model_id = model_id)
             action = itemid_to_action[decision]
             model.reward(request_id, int(action), float(reward),model_id=model_id)
+            
+        logger.info(f"Training end")
+        logger.info(f"Testing begin")
+        cum_reward = 0
+        cum_correct=0
+        cum_n_actions = 0
+        for index,rows in test.iterrows():
+            df_context = rows["context"]
+            try:
+                feats = json.loads(df_context)
+            except:
+                feats = df_context
+            context = predictor.predict(feats, choices=None, get_ucb_scores=False, ext=False)
+            context = context['pytorch_input']['X_float'].numpy()
+            reward = float(rows["reward"])
+            request_id = "{}_{}".format(index,model_id)            
+            decision = rows['decision']
+            request_id = "test_{}_{}".format(index,model_id)
+            _context = {action_id: context for action_id in action_storage.iterids()}
+            recom = model.get_action(context,len_list=1,request_id=request_id,model_id = model_id)
+            predict_action = [action_to_itemid.get(int(i.action.id)) for i in recom][0]
+            cum_n_actions +=1
+            if str(predict_action)==str(decision):
+                cum_reward+= reward
+                cum_correct+=1
+        avg_correct = cum_correct/cum_n_actions
+        logger.info(utils.color_text(f"predictor's accuracy:{avg_correct}", color="blue"))
+        logger.info(utils.color_text(f"all actions:{cum_n_actions}", color="blue"))
+        logger.info(utils.color_text(f"cumulative rewards:{cum_reward}", color="blue"))
 
     elif model_type in ("gbdt_bandit", "random_forest_bandit", "linear_bandit"):
         logger.info(f"Training {model_type}")

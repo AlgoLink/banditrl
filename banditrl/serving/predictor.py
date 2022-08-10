@@ -138,7 +138,8 @@ class BanditPredictor:
                    feature={}, 
                    request_id=None,
                    model_id=None,
-                   topN=1,uid=None,
+                   topN=1,
+                   uid=None,
                    auto_feature=True,
                    user_model=True):
         if self.model_type in ("linucb_array","logisticucb"):
