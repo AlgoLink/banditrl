@@ -54,7 +54,7 @@ def config_template_gen(config_type="ml"):
         
     return config_contents
         
-def save_config(configs,db_path=None):
+def config_save(configs,db_path=None):
     if db_path is None:
         db_path = os.path.join(os.getcwd(),"model_configs.json")
     db=TinyDB(db_path)
