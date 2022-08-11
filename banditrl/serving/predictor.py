@@ -249,15 +249,15 @@ class BanditPredictor:
             reward_key = f"{model_id}_{self.model_type}_rewardscum"
 
             if self.model_acc.get(request_key):
-                model_acc_expose = self.model_acc.get(model_acc_expose_key)
-                if model_acc_expose:
-                    model_acc_reward = self.model_acc.incr(model_acc_reward_key)
-                    model_acc = float(model_acc_reward)/float(model_acc_expose)
-                    self.model_acc.set(model_acc_key,str(model_acc))
+                #model_acc_expose = self.model_acc.get(model_acc_expose_key)
+                #if model_acc_expose:
+                #    model_acc_reward = self.model_acc.incr(model_acc_reward_key)
+                #    model_acc = float(model_acc_reward)/float(model_acc_expose)
+                #    self.model_acc.set(model_acc_key,str(model_acc))
                 rewardscum = self.model_acc.get(reward_key)
                 if rewardscum:
                     _rewardscum = float(rewardscum)
-                    _rewardscum+=float(reward)
+                    _rewardscum+= float(reward)
                     self.model_acc.set(reward_key,str(_rewardscum))
                 else:
                     self.model_acc.set(reward_key,str(reward))
