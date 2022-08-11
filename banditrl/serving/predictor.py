@@ -240,6 +240,8 @@ class BanditPredictor:
                               model_id=uid_model)
             
         if self.model_acc:
+            model_types_key = f"{model_id}_model_types"
+            self.model_acc.sadd(model_types_key,self.model_type)
             request_key = f"{model_id}_{request_id}_{self.model_type}"
             model_acc_expose_key=f"{model_id}_{self.model_type}_expose"
             model_acc_reward_key=f"{model_id}_{self.model_type}_reward"
@@ -283,7 +285,12 @@ class BanditPredictor:
         else:
             model_acc = 0.0
         model_reward_cum = self.model_acc.get(reward_key)
-        result = {"model_acc":model_acc,"model_reward_cum":model_reward_cum}
+        model_types_key = f"{model_id}_model_types"
+        model_types = self.model_acc.smembers(model_types_key)
+        result = {"model_acc":model_acc,
+                  "model_reward_cum":model_reward_cum,
+                  "model_type":self.model_type,
+                  "model_types":model_types}
         
         return result
         
