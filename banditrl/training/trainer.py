@@ -108,10 +108,11 @@ def train(
     # model storage
     storage = ml_config["storage"]
     if storage["model"].get("type","rlite")=="rlite":
-        dbpath = storage["model"].get("path",os.path.join(os.getcwd(),"model.db"))
-        model_storage= RliteModelStorage(dbpath)
+        modelpath = storage["model"].get("path",os.getcwd())
+        model_db = os.path.join(modelpath,f"{model_id}_model.db")
+        model_storage= RliteModelStorage(model_db)
         if ml_config["features"].get("context_free", False):
-            rlite_path = dbpath
+            rlite_path = model_db
     elif storage["model"].get("type","rlite")=="redis":
         host= storage["model"].get("host",'0.0.0.0')
         port= storage["model"].get("port",6379)
@@ -121,8 +122,9 @@ def train(
         model_storage = MemoryModelStorage()
     # his context storage
     if storage["his_context"].get("type","rlite")=="rlite":
-        dbpath = storage["his_context"].get("path",os.path.join(os.getcwd(),"his_context.db"))
-        his_context_storage= RliteHistoryStorage(dbpath)
+        dbpath = storage["his_context"].get("path",os.getcwd())
+        his_db = os.path.join(dbpath,f"{model_id}_his_context.db")
+        his_context_storage= RliteHistoryStorage(his_db)
     else:
         his_context_storage = MemoryHistoryStorage()
         

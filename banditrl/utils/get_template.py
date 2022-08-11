@@ -37,11 +37,12 @@ def config_template_gen(config_type="ml"):
         config_contents["version"] = 1.0
         config_contents["config_type"]="ml"
         config_contents["storage"]= {
-            "model":{"type":"rlite", "path":"models/model.db"},
-            "his_context":{"type":"rlite", "path":"models/his_context.db"},
+            "model":{"type":"rlite", "path":"models"},
+            "his_context":{"type":"rlite", "path":"models"},
             "action":{},
             "predictor_save_dir":"models",
-            "log_path":False
+            "log_path":None,
+            "model_acc_path":None
         }
         config_contents["features"]= {
             "context_free":False,

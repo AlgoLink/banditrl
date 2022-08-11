@@ -3,6 +3,8 @@ from ..preprocessing.feature_encodings import BanditContextEncoder
 from ..utils import model_constructors,utils
 import os
 import json
+import hirlite
+import pickle
 
 from ..storage import (
     MemoryHistoryStorage,
@@ -23,11 +25,18 @@ class BanditPredictor:
         self.ml_config = ml_config
         self.model=self.build_model
         self.model_type=ml_config.get("model_type")
+        self.model_id = ml_config.get("model_id")
+        self.reward_type = ml_config.get("reward_type","regression")
         log_path = ml_config["storage"].get("log_path")
+        model_acc_path = ml_config["storage"].get("model_acc_path")
         if log_path:
             self.log_db = utils.log_data(log_path)
         else:
             self.log_db = None
+        if model_acc_path:
+            self.model_acc = hirlite.Rlite(os.path.join(model_acc_path,"model_acc.db"),encoding='utf8')
+        else:
+            self.model_acc = None
         predictor_save_dir = self.ml_config["storage"].get("predictor_save_dir")
         if predictor_save_dir is not None:
             self.feature_transformer = self.build_feature_transformer
@@ -53,10 +62,11 @@ class BanditPredictor:
         # model storage
         storage = self.ml_config["storage"]
         if storage["model"].get("type","rlite")=="rlite":
-            dbpath = storage["model"].get("path",os.path.join(os.getcwd(),"model.db"))
-            model_storage= RliteModelStorage(dbpath)
+            modelpath = storage["model"].get("path",os.getcwd())
+            model_db = os.path.join(modelpath,f"{model_id}_model.db")
+            model_storage= RliteModelStorage(model_db)
             if self.ml_config["features"].get("context_free", False):
-                rlite_path = dbpath
+                rlite_path = model_db
         elif storage["model"].get("type","rlite")=="redis":
             host= storage["model"].get("host",'0.0.0.0')
             port= storage["model"].get("port",6379)
@@ -66,8 +76,9 @@ class BanditPredictor:
             model_storage = MemoryModelStorage()
         # his context storage
         if storage["his_context"].get("type","rlite")=="rlite":
-            dbpath = storage["his_context"].get("path",os.path.join(os.getcwd(),"his_context.db"))
-            his_context_storage= RliteHistoryStorage(dbpath)
+            dbpath = storage["his_context"].get("path",os.getcwd())
+            his_db = os.path.join(dbpath,f"{model_id}_his_context.db")
+            his_context_storage= RliteHistoryStorage(his_db)
         else:
             his_context_storage = MemoryHistoryStorage()
         
@@ -177,6 +188,14 @@ class BanditPredictor:
                 recom_list = self.model.get_action(topN= topN,model_id= uid_model)
             else:
                 recom_list = self.model.get_action(topN= topN,model_id= model_id)
+
+        if self.model_acc:
+            request_key = f"{model_id}_{request_id}_{self.model_type}"
+            model_acc_expose_key=f"{model_id}_{self.model_type}_expose"
+            self.model_acc.incr(model_acc_expose_key)
+            self.model_acc.incr(request_key)
+            
+            
         if self.log_db is not None:
             if len(recom_list)>0:
                 recom = str(recom_list[0])
@@ -194,6 +213,8 @@ class BanditPredictor:
     def reward(self,request_id,action,reward, model_id,user_model=True):
         if self.model_type in ("linucb_array","logisticucb"):
             actionid=self.itemid_to_action.get(action)
+            if self.reward_type=='binary':
+                reward = 1.0
             self.model.reward(request_id, 
                               int(actionid), 
                               float(reward),
@@ -218,6 +239,27 @@ class BanditPredictor:
                               reward=reward,
                               model_id=uid_model)
             
+        if self.model_acc:
+            request_key = f"{model_id}_{request_id}_{self.model_type}"
+            model_acc_expose_key=f"{model_id}_{self.model_type}_expose"
+            model_acc_reward_key=f"{model_id}_{self.model_type}_reward"
+            model_acc_key=f"{model_id}_{self.model_type}"
+            reward_key = f"{model_id}_{self.model_type}_rewardscum"
+
+            if self.model_acc.get(request_key):
+                model_acc_expose = self.model_acc.get(model_acc_expose_key)
+                if model_acc_expose:
+                    model_acc_reward = self.model_acc.incr(model_acc_reward_key)
+                    model_acc = float(model_acc_reward)/float(model_acc_expose)
+                    self.model_acc.set(model_acc_key,str(model_acc))
+                rewardscum = self.model_acc.get(reward_key)
+                if rewardscum:
+                    _rewardscum = float(rewardscum)
+                    _rewardscum+=float(reward)
+                    self.model_acc.set(reward_key,str(_rewardscum))
+                else:
+                    self.model_acc.set(reward_key,str(reward))
+
         if self.log_db is not None:
             measurement = "reward"
             tags = {"model_id":str(model_id),
@@ -227,3 +269,21 @@ class BanditPredictor:
             fields = {"reward":float(reward),"log_type":2}
             self.log_db.log_model_details(measurement,tags,fields)
         return True
+    
+    def get_model_acc(self,model_id):
+        model_acc_expose_key=f"{model_id}_{self.model_type}_expose"
+        model_acc_reward_key=f"{model_id}_{self.model_type}_reward"
+
+        reward_key = f"{model_id}_{self.model_type}_rewardscum"
+        model_acc_reward=self.model_acc.get(model_acc_reward_key)
+        model_acc_expose = self.model_acc.get(model_acc_expose_key)
+
+        if model_acc_reward and model_acc_expose:
+            model_acc = float(model_acc_reward)/float(model_acc_expose)
+        else:
+            model_acc = 0.0
+        model_reward_cum = self.model_acc.get(reward_key)
+        result = {"model_acc":model_acc,"model_reward_cum":model_reward_cum}
+        
+        return result
+        
