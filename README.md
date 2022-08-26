@@ -32,7 +32,7 @@
 ## 项目简介
 
 <div align="center" >
-  <img src="resources/bandit.png" width="33%" align="right" />
+  <img src="resources/bandit.png" width="43%" align="right" />
 </div>
 
 本项目的目标是建立一个灵活简单的在线学习库，并且有足够的性能在生产中使用。在许多现实世界的应用中（例如，推荐系统），action的数量和每秒请求的数量可能非常大，所以我们应该非常小心地管理模型存储、action存储和历史请求数据的存储。因为不同系统的存储管理是非常不同的，我们让用户可以定义如何做。
@@ -49,7 +49,7 @@
 banditrl提供了核心的上下文bandit算法，以及一些常见的存储操作（如内存存储/基于Rlite/redis的存储）。
 
 ## 技术架构
-<img src="resources/art.png">
+<img src="resources/art.png" width="60%" >
 
 ## 当前支持的模型
 
