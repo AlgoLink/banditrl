@@ -210,7 +210,7 @@ class BanditPredictor:
             self.log_db.log_model_details(measurement,tags,fields)
         return recom_list
     
-    def reward(self,request_id,action,reward, model_id,user_model=True):
+    def reward(self,request_id,action,reward, model_id,uid=None,user_model=True):
         if self.model_type in ("linucb_array","logisticucb"):
             actionid=self.itemid_to_action.get(action)
             if self.reward_type=='binary':
