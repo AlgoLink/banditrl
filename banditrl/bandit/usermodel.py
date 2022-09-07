@@ -343,10 +343,17 @@ class BTS(BaseBandit):
             
             model = self._model_storage.get_model(model_key)
             #更新曝光ID的 score
-            model_tries = model.get(tries_key)
-            alpha = model[alpha_key]
-            beta = model[beta_key]
-            rewards = model[reward_key]
+            if model is None:
+                model = {}
+                model_tries = None
+                alpha = 1.0
+                beta = 1.0
+                rewards = 0.0
+            else:
+                model_tries = model.get(tries_key)
+                alpha = model.get(alpha_key,1.0)
+                beta = model.get(beta_key,1.0)
+                rewards = model.get(reward_key,0.0)
             if model_tries is None:
                 model_tries = 1
             else:
